@@ -1,0 +1,17 @@
+version: '3.5'
+
+services:
+
+  eventstore:
+    image: eventstore/eventstore
+    volumes:
+      - .:/src
+    environment:
+      - EVENTSTORE_CERTIFICATE_FILE=/src/softwarepioniere_dev.pfx
+      - EVENTSTORE_CERTIFICATE_PASSWORD=Password
+      - EVENTSTORE_EXT_SECURE_TCP_PORT=1115
+      - EVENTSTORE_RUN_PROJECTION=all
+    ports:
+      - "2113:2113"
+      - "1113:1113"
+      - "1115:1115"

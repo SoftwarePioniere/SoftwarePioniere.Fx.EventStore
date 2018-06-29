@@ -1,0 +1,21 @@
+# directories
+**/bin/
+**/obj/
+**/out/
+**/artifacts/
+**/tools/
+**/.vscode/
+**/.vs/
+**/scripts/
+**/.git/
+
+# files
+Dockerfile*
+.gitignore
+**/*.trx
+**/*.md
+*.ps1
+*.cake
+GitVersion.yml
+nuget*.*
+!nuget.config.build.tmp

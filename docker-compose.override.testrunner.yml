@@ -1,0 +1,13 @@
+version: '3.5'
+
+services:
+
+  testrunner:
+    image: "${TAG}"
+    depends_on:
+      - eventstore
+    environment:
+      - SOPI_TESTS_MONGODB__PORT=27017
+    volumes:
+      - "${TESTRESULTS}:/testresults"
+    command: ["dotnet", "test", "--logger:trx", "--no-build", "--no-restore", "-c", "${CONFIGURATION}", "-r" , "/testresults" , "/p:NuGetVersionV2=${NUGETVERSIONV2}", "/p:AssemblySemVer=${ASSEMBLYSEMVER}" ]
