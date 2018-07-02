@@ -332,3 +332,4 @@ ASALocalRun/
 nuget.config.build.tmp
 log*.txt
 !softwarepioniere_dev.pfx
+.env

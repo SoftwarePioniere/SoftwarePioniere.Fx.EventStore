@@ -1,10 +1,13 @@
-FROM microsoft/dotnet:2.1.300-rc1-sdk-alpine AS restore
+FROM microsoft/dotnet:2.1.300-sdk-alpine AS restore
 ARG CONFIGURATION=Release
 WORKDIR /proj
 COPY nuget.config.build.tmp ./nuget.config
 COPY Directory.Build.* ./
 COPY *.sln ./
+COPY src/SoftwarePioniere.DomainModel.Services.EventStore/*.csproj ./src/SoftwarePioniere.DomainModel.Services.EventStore/
 COPY src/SoftwarePioniere.EventStore/*.csproj ./src/SoftwarePioniere.EventStore/
+COPY src/SoftwarePioniere.EventStore.TestHarness/*.csproj ./src/SoftwarePioniere.EventStore.TestHarness/
+
 COPY test/SoftwarePioniere.EventStore.Tests/*.csproj ./test/SoftwarePioniere.EventStore.Tests/
 RUN dotnet restore SoftwarePioniere.Fx.EventStore.sln
 
