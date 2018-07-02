@@ -5,12 +5,12 @@ namespace SoftwarePioniere.EventStore
     public static class UtilExtensions
     {
        
-        public static string GetToStringFromEncoded(this byte[] arr)
+        public static string FromUtf8(this byte[] arr)
         {
             return Encoding.UTF8.GetString(arr);
         }
 
-        public static byte[] GetByteArrayFromStringEncoded(this string str)
+        public static byte[] ToUtf8(this string str)
         {
             return Encoding.UTF8.GetBytes(str);
         }

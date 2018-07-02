@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\SoftwarePioniere.EventStore.TestHarness\SoftwarePioniere.EventStore.TestHarness.csproj" />
     <ProjectReference Include="..\..\src\SoftwarePioniere.EventStore\SoftwarePioniere.EventStore.csproj" />
   </ItemGroup>
 

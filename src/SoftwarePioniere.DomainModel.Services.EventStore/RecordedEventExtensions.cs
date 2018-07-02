@@ -12,8 +12,8 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
         public static IDomainEvent ToDomainEvent(this RecordedEvent recordedEvent)
         {
-            var data = recordedEvent.Data.GetToStringFromEncoded();
-            var meta = recordedEvent.Metadata.GetToStringFromEncoded();
+            var data = recordedEvent.Data.FromUtf8();
+            var meta = recordedEvent.Metadata.FromUtf8();
 
             var eventHeaders = JsonConvert.DeserializeObject<Dictionary<string, string>>(meta);
 
@@ -35,7 +35,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
         public static T ToDomainEvent<T>(this RecordedEvent recordedEvent)
         {
-            var meta = recordedEvent.Metadata.GetToStringFromEncoded();
+            var meta = recordedEvent.Metadata.FromUtf8();
             var eventHeaders = JsonConvert.DeserializeObject<Dictionary<string, string>>(meta);
 
             if (!eventHeaders.ContainsKey(EventStoreConstants.EventShortClrTypeHeader))
@@ -51,7 +51,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
         public static string GetJsonData(this RecordedEvent recordedEvent)
         {
-            var data = recordedEvent.Data.GetToStringFromEncoded();
+            var data = recordedEvent.Data.FromUtf8();
             return data;
 
         }
@@ -59,7 +59,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
         public static Tuple<T, string> ToDomainEventWithJson<T>(this RecordedEvent recordedEvent)
         {
-            var meta = recordedEvent.Metadata.GetToStringFromEncoded();
+            var meta = recordedEvent.Metadata.FromUtf8();
             var eventHeaders = JsonConvert.DeserializeObject<Dictionary<string, string>>(meta);
 
             if (!eventHeaders.ContainsKey(EventStoreConstants.EventShortClrTypeHeader))
@@ -68,7 +68,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             if (!string.Equals(eventHeaders[EventStoreConstants.EventShortClrTypeHeader], (typeof(T).GetTypeShortName())))
                 throw new InvalidOperationException("Event is not compatible");
 
-            var data = recordedEvent.Data.GetToStringFromEncoded();
+            var data = recordedEvent.Data.FromUtf8();
             return new Tuple<T, string>(JsonConvert.DeserializeObject<T>(data), data);
         }
 

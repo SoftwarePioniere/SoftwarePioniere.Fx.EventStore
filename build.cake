@@ -20,8 +20,8 @@ var isDryRun        = HasArgument("dryrun1");
 
 var artifactsDirectory  = Directory("./artifacts");
 var version             = "0.0.0";
-var solutionFile        = File("./SoftwarePioniere.EventStore.sln");
-var image               = "softwarepioniere/softwarepioniere.eventstore";
+var solutionFile        = File("./SoftwarePioniere.Fx.EventStore.sln");
+var image               = "softwarepioniere/softwarepioniere.fx.eventstore";
 var nugetApiKey         = "VSTS";
 var vstsToken           = "XXX";
 

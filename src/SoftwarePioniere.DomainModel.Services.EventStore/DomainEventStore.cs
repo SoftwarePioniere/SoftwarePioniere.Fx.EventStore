@@ -12,7 +12,7 @@ using SoftwarePioniere.Messaging;
 
 namespace SoftwarePioniere.DomainModel.Services.EventStore
 {
-    public class XEventStore : IEventStore
+    public class DomainEventStore : IEventStore
     {
         private const int ReadPageSize = 100;
 
@@ -21,12 +21,12 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
         private readonly Microsoft.Extensions.Logging.ILogger _logger;
         private readonly EventStoreConnectionProvider _provider;
 
-        public XEventStore(ILoggerFactory loggerFactory, EventStoreConnectionProvider provider) : this(loggerFactory, provider,
+        public DomainEventStore(ILoggerFactory loggerFactory, EventStoreConnectionProvider provider) : this(loggerFactory, provider,
             Util.AggregateIdToStreamName) //, Util.EventTypeToEventName)
         {
         }
 
-        public XEventStore(ILoggerFactory loggerFactory
+        public DomainEventStore(ILoggerFactory loggerFactory
             , EventStoreConnectionProvider provider
             , Func<Type, string, string> aggregateIdToStreamName
         )

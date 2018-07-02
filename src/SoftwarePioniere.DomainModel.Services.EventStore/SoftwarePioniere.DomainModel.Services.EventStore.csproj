@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Software Pioniere Fx Event Store Domain Services</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.1.2" />
+    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="$(SoftwarePioniereFxVersion)" />
   </ItemGroup>
 
   <ItemGroup>

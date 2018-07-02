@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>SoftwarePioniere.EventStore</RootNamespace>
+    <Description>Software Pioniere Fx EventStore Test Harness</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SoftwarePioniere.TestHarness" Version="$(SoftwarePioniereFxVersion)" />
+  </ItemGroup>
+
+</Project>

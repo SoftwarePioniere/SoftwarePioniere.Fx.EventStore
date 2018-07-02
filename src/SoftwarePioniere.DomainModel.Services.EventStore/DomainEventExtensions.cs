@@ -14,7 +14,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
         public static EventData ToEventData(this IDomainEvent evnt, IDictionary<string, string> headers)
         {
-            var data = JsonConvert.SerializeObject(evnt).GetByteArrayFromStringEncoded();
+            var data = JsonConvert.SerializeObject(evnt).ToUtf8();
 
             if (headers == null)
                 headers = new Dictionary<string, string>();
@@ -29,7 +29,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
             };
 
-            var metadata = JsonConvert.SerializeObject(eventHeaders).GetByteArrayFromStringEncoded();
+            var metadata = JsonConvert.SerializeObject(eventHeaders).ToUtf8();
 
             var eventName = evnt.GetType().GetEventName();
 

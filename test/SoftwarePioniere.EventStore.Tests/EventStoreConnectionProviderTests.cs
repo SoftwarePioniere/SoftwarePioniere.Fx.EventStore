@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -17,11 +16,11 @@ namespace SoftwarePioniere.EventStore.Tests
                 .AddEventStoreConnection();
 
             var opt = ServiceCollection.AddOptions()
-                   .Configure<EventStoreOptions>(c => Configurator.Instance.ConfigurationRoot.Bind("EventStore", c));
+                   .Configure<EventStoreOptions>(c => new TestConfiguration().ConfigurationRoot.Bind("EventStore", c));
 
             if (config != null)
             {
-                opt.PostConfigure<EventStoreOptions>(config);
+                opt.PostConfigure(config);
             }
 
             return GetService<EventStoreConnectionProvider>();
@@ -33,7 +32,7 @@ namespace SoftwarePioniere.EventStore.Tests
             var provider = CreateProvider(c => c.UseSslCertificate = false);
             var con = provider.Connection.Value;
             var meta = con.GetStreamMetadataAsync("$all", provider.AdminCredentials).Result;
-            meta.Stream.Should().Be("$all");         
+            meta.Stream.Should().Be("$all");
         }
 
         [Fact]
@@ -42,7 +41,7 @@ namespace SoftwarePioniere.EventStore.Tests
             var provider = CreateProvider(c => c.UseSslCertificate = true);
             var con = provider.Connection.Value;
             var meta = con.GetStreamMetadataAsync("$all", provider.AdminCredentials).Result;
-            meta.Stream.Should().Be("$all");     
+            meta.Stream.Should().Be("$all");
         }
 
         [Fact]

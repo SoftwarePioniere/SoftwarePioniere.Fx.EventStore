@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>EventStore Library</Description>
+    <Description>Software Pioniere Fx Event Store Library</Description>
   </PropertyGroup>
 
   <ItemGroup>

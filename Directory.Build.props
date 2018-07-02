@@ -14,17 +14,15 @@
     <BaseIntermediateOutputPath>$(MSBuildProjectDirectory)/obj/container/</BaseIntermediateOutputPath>
     <BaseOutputPath>$(MSBuildProjectDirectory)/bin/container/</BaseOutputPath>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <noWarn>1591</noWarn>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-      <AspNetCoreVersion>2.1.0-rc1-final</AspNetCoreVersion>
-      <SopiAspNetCoreVersion>0.2.1</SopiAspNetCoreVersion>
-      <CommonLibVersion>0.1.214</CommonLibVersion>
-      <MitarbeiterverwaltungVersion>0.1.2</MitarbeiterverwaltungVersion>
+      <AspNetCoreVersion>2.1.0</AspNetCoreVersion>
+      <SoftwarePioniereFxVersion>0.2.2</SoftwarePioniereFxVersion>
   </PropertyGroup>
 
   <PropertyGroup>
