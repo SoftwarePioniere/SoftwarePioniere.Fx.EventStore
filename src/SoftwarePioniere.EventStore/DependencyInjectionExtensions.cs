@@ -24,7 +24,7 @@ namespace SoftwarePioniere.EventStore
 
             services
                 .AddSingleton<EventStoreConnectionProvider>()
-                 
+                .AddTransient<EventStoreSetup>()
                 ;
 
             return services;

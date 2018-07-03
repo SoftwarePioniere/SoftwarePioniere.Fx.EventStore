@@ -14,6 +14,7 @@
     <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="4.0.0" />
+    <PackageReference Include="SoftwarePioniere.DomainModel.TestHarness" Version="0.2.2" />
     <PackageReference Include="xunit" Version="2.3.1" />
      <PackageReference Include="FluentAssertions" Version="5.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
@@ -25,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\SoftwarePioniere.DomainModel.Services.EventStore\SoftwarePioniere.DomainModel.Services.EventStore.csproj" />
     <ProjectReference Include="..\..\src\SoftwarePioniere.EventStore.TestHarness\SoftwarePioniere.EventStore.TestHarness.csproj" />
     <ProjectReference Include="..\..\src\SoftwarePioniere.EventStore\SoftwarePioniere.EventStore.csproj" />
   </ItemGroup>
