@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoftwarePioniere.EventStore
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoftwarePioniere.DomainModel.Services.EventStore", "src\SoftwarePioniere.DomainModel.Services.EventStore\SoftwarePioniere.DomainModel.Services.EventStore.csproj", "{27EFC10D-B3E0-4A8D-92CD-11B121370B1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoftwarePioniere.EventStore.TestHarness", "src\SoftwarePioniere.EventStore.TestHarness\SoftwarePioniere.EventStore.TestHarness.csproj", "{FA7D1822-3541-40A4-BC48-B4946A8C4FA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoftwarePioniere.EventStore.TestHarness", "src\SoftwarePioniere.EventStore.TestHarness\SoftwarePioniere.EventStore.TestHarness.csproj", "{FA7D1822-3541-40A4-BC48-B4946A8C4FA5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ED2E980B-CF73-43D7-AF78-5E5BA659B282}"
 	ProjectSection(SolutionItems) = preProject

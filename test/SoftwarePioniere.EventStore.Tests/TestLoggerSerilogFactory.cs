@@ -45,6 +45,7 @@ namespace SoftwarePioniere.EventStore.Tests
                 _testOutputHelper.WriteLine(logEntry.ToString(false));
                 _serilogger.Debug(logEntry.Message);
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch (Exception)
             {
             }

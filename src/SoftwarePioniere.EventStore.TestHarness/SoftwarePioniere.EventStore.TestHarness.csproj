@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoftwarePioniere.TestHarness" Version="$(SoftwarePioniereFxVersion)" />
+    <PackageReference Include="SoftwarePioniere.TestHarness" Version="0.2.4" />
   </ItemGroup>
 
 </Project>

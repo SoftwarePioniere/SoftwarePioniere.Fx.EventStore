@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SoftwarePioniere.DomainModel;
-using SoftwarePioniere.DomainModel.Services.EventStore;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,7 +14,7 @@ namespace SoftwarePioniere.EventStore.Tests
             ServiceCollection
                 .AddEventStoreConnection();
 
-            var opt = ServiceCollection.AddOptions()
+            ServiceCollection.AddOptions()
                 .Configure<EventStoreOptions>(c => new TestConfiguration().ConfigurationRoot.Bind("EventStore", c));
 
             ServiceCollection.AddDomainEventStore();

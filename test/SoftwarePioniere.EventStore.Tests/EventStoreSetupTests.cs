@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -100,8 +98,9 @@ namespace SoftwarePioniere.EventStore.Tests
             ServiceCollection
                 .AddEventStoreConnection();
 
-            var opt = ServiceCollection.AddOptions()
-                .Configure<EventStoreOptions>(c => new TestConfiguration().ConfigurationRoot.Bind("EventStore", c));
+                ServiceCollection
+                    .AddOptions()
+                    .Configure<EventStoreOptions>(c => new TestConfiguration().ConfigurationRoot.Bind("EventStore", c));
         }
     }
 }
