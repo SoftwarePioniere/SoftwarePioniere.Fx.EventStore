@@ -3,18 +3,9 @@ version: '3.5'
 services:
 
   eventstore:
-    image: eventstore/eventstore
-    volumes:
-      - .:/src
-    environment:
-      - EVENTSTORE_CERTIFICATE_FILE=/src/softwarepioniere_dev.pfx
-      - EVENTSTORE_CERTIFICATE_PASSWORD=Password
-      - EVENTSTORE_EXT_HTTP_PORT=2193
-      - EVENTSTORE_EXT_HTTP_PREFIXES=http://*:2193/
-      - EVENTSTORE_EXT_TCP_PORT=1193
-      - EVENTSTORE_EXT_SECURE_TCP_PORT=1195
-      - EVENTSTORE_RUN_PROJECTION=all
+    image: softwarepioniere/eventstore
     ports:
       - "2193:2193"
       - "1193:1193"
       - "1195:1195"
+

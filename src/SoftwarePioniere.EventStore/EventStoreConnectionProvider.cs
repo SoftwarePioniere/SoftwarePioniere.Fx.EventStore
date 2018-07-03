@@ -109,7 +109,7 @@ namespace SoftwarePioniere.EventStore
         {
             con.Disconnected += (s, e) =>
             {
-                _logger.LogWarning("EventStore Disconnected: {ConnectionName}", e.Connection.ConnectionName);
+                _logger.LogDebug("EventStore Disconnected: {ConnectionName}", e.Connection.ConnectionName);
                 IsConnected = false;
                 OnConnectionChanged();
 
@@ -117,12 +117,12 @@ namespace SoftwarePioniere.EventStore
 
             con.Reconnecting += (s, e) =>
             {
-                _logger.LogWarning("EventStore Reconnecting: {ConnectionName}", e.Connection.ConnectionName);
+                _logger.LogDebug("EventStore Reconnecting: {ConnectionName}", e.Connection.ConnectionName);
             };
 
             con.Connected += (s, e) =>
             {
-                _logger.LogInformation("EventStore Connected: {ConnectionName}", e.Connection.ConnectionName);
+                _logger.LogDebug("EventStore Connected: {ConnectionName}", e.Connection.ConnectionName);
                 IsConnected = true;
 
 
