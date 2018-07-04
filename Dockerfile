@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.1.300-sdk-alpine AS restore
+FROM microsoft/dotnet:2.1-sdk-alpine AS restore
 ARG CONFIGURATION=Release
 WORKDIR /proj
 COPY nuget.config.build.tmp ./nuget.config
