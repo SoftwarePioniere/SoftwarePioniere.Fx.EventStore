@@ -18,7 +18,7 @@ namespace SoftwarePioniere.EventStore.Tests
             ServiceCollection.AddOptions()
                 .Configure<EventStoreOptions>(c => new TestConfiguration().ConfigurationRoot.Bind("EventStore", c));
 
-            ServiceCollection.AddDomainEventStore();
+            ServiceCollection.AddEventStoreDomainServices();
         }
 
         [Fact]

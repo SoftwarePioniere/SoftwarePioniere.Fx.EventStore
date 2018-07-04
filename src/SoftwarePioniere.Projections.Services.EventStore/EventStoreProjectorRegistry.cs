@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using Foundatio.Queues;
 using Microsoft.Extensions.Logging;
-using SoftwarePioniere.DomainModel;
 using SoftwarePioniere.EventStore;
+using SoftwarePioniere.Messaging;
 using SoftwarePioniere.ReadModel;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 

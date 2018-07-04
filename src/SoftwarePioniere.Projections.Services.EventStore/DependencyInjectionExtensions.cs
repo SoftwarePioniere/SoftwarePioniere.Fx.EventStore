@@ -7,11 +7,11 @@ namespace SoftwarePioniere.Extensions.DependencyInjection
 {
     public static class DependencyInjectionExtensions
     {
-        public static IServiceCollection AddEventStoreProjections(this IServiceCollection services)
+        public static IServiceCollection AddEventStoreProjectionServices(this IServiceCollection services)
         {
             return services
+                    .AddProjectionServices()   
                     .AddTransient<IProjectorRegistry, EventStoreProjectorRegistry>();
-
 
         }
 

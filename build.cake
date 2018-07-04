@@ -246,7 +246,7 @@ Task("BuildTestPackLocalPush")
     .IsDependentOn("Version")
     .IsDependentOn("Restore")
     .IsDependentOn("Build")
-    .IsDependentOn("Test")
+   // .IsDependentOn("Test")
     .IsDependentOn("Pack")
     .IsDependentOn("PushPackagesLocal")
     ;
