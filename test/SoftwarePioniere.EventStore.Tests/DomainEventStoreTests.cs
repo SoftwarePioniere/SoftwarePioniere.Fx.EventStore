@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SoftwarePioniere.DomainModel;
+using SoftwarePioniere.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
