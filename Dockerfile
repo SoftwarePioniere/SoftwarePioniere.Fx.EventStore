@@ -7,6 +7,7 @@ COPY *.sln ./
 COPY src/SoftwarePioniere.DomainModel.Services.EventStore/*.csproj ./src/SoftwarePioniere.DomainModel.Services.EventStore/
 COPY src/SoftwarePioniere.EventStore/*.csproj ./src/SoftwarePioniere.EventStore/
 COPY src/SoftwarePioniere.EventStore.TestHarness/*.csproj ./src/SoftwarePioniere.EventStore.TestHarness/
+COPY src/SoftwarePioniere.Projections.Services.EventStore/*.csproj ./src/SoftwarePioniere.Projections.Services.EventStore/
 
 COPY test/SoftwarePioniere.EventStore.Tests/*.csproj ./test/SoftwarePioniere.EventStore.Tests/
 RUN dotnet restore SoftwarePioniere.Fx.EventStore.sln
