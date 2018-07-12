@@ -9,7 +9,7 @@
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 
-CAKE_VERSION=0.28.0
+CAKE_VERSION=0.29.0
 DOTNET_VERSION=2.1.101
 DOTNET_INSTALLER_URI=https://dot.net/v1/dotnet-install.sh
 

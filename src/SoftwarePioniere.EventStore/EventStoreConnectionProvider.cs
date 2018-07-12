@@ -97,13 +97,15 @@ namespace SoftwarePioniere.EventStore
             var endpoints = Options.ClusterIpEndpoints.Select((x, i) =>
             {
                 var ipa = GetHostIp(x);
+                var port = Options.TcpPort;
 
                 if (Options.ClusterHttpPorts.Length >= i + 1)
                 {
-                    return new IPEndPoint(ipa, Options.ClusterHttpPorts[i]);
+                    port = Options.ClusterHttpPorts[i];
                 }
 
-                return new IPEndPoint(IPAddress.Parse(x), Options.TcpPort);
+                _logger.LogInformation($"Creating Cluster IP Endpoint: {ipa}:{port}");
+                return new IPEndPoint(ipa, port);
 
             });
 

@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.6'
 
 services:
 
@@ -6,8 +6,14 @@ services:
     image: "${TAG}"
     depends_on:
       - eventstore
+      - node1
+      - node2
+      - node3
+    networks:
+      app_net_tests:
+        ipv4_address: 172.16.239.20
     environment:
-      - SOPI_TESTS_EventStore__IpEndPoint=eventstore
+        - abc=123
     volumes:
       - "${TESTRESULTS}:/testresults"
     command: ["dotnet", "test", "--logger:trx", "-v:normal", "--no-build", "--no-restore", "-c", "${CONFIGURATION}", "-r" , "/testresults" , "-d", "/testresults/diag.txt", "/p:NuGetVersionV2=${NUGETVERSIONV2}", "/p:AssemblySemVer=${ASSEMBLYSEMVER}" ]

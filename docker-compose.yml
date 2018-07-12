@@ -7,6 +7,9 @@ services:
         - "2193:2193"
         - "1193:1193"
         - "1195:1195"
+    networks:
+      app_net_tests:
+        ipv4_address: 172.16.239.10
 
   node1:
     image: softwarepioniere/eventstore-node1
@@ -15,13 +18,12 @@ services:
         - "3114:3114"
         - "3115:3115"
     environment:
-        - EVENTSTORE_GOSSIP_SEED=172.16.238.12:3123,172.16.238.13:3133
-        - EVENTSTORE_EXT_IP=172.16.238.11
-        - EVENTSTORE_INT_IP=172.16.238.11
-        - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1
+        - EVENTSTORE_GOSSIP_SEED=172.16.239.12:3123,172.16.239.13:3133
+        - EVENTSTORE_EXT_IP=172.16.239.11
+        - EVENTSTORE_INT_IP=172.16.239.11
     networks:
-      app_net:
-        ipv4_address: 172.16.238.11
+      app_net_tests:
+        ipv4_address: 172.16.239.11
 
   node2:
     image: softwarepioniere/eventstore-node2
@@ -30,13 +32,12 @@ services:
         - "3124:3124"
         - "3125:3125"
     environment:
-        - EVENTSTORE_GOSSIP_SEED=172.16.238.11:3113,172.16.238.13:3133
-        - EVENTSTORE_EXT_IP=172.16.238.12
-        - EVENTSTORE_INT_IP=172.16.238.12
-        - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1
+        - EVENTSTORE_GOSSIP_SEED=172.16.239.11:3113,172.16.239.13:3133
+        - EVENTSTORE_EXT_IP=172.16.239.12
+        - EVENTSTORE_INT_IP=172.16.239.12
     networks:
-      app_net:
-        ipv4_address: 172.16.238.12
+      app_net_tests:
+        ipv4_address: 172.16.239.12
 
   node3:
     image: softwarepioniere/eventstore-node3
@@ -45,20 +46,19 @@ services:
         - "3134:3134"
         - "3135:3135"
     environment:
-        - EVENTSTORE_GOSSIP_SEED=172.16.238.11:3113,172.16.238.12:3123
-        - EVENTSTORE_EXT_IP=172.16.238.13
-        - EVENTSTORE_INT_IP=172.16.238.13
-        - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1
+        - EVENTSTORE_GOSSIP_SEED=172.16.239.11:3113,172.16.239.12:3123
+        - EVENTSTORE_EXT_IP=172.16.239.13
+        - EVENTSTORE_INT_IP=172.16.239.13
     networks:
-      app_net:
-        ipv4_address: 172.16.238.13
+      app_net_tests:
+        ipv4_address: 172.16.239.13
 
 
 networks:
-  app_net:
+  app_net_tests:
     driver: bridge
     ipam:
       driver: default
       config:
       -
-        subnet: 172.16.238.0/24
+        subnet: 172.16.239.0/24

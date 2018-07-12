@@ -200,16 +200,20 @@ Task("DockerTest")
 {
 
 
+    var env1 = new [] {
+         "SOPI_TESTS_EventStore__IpEndPoint=eventstore"
+    };
 
-//   MyDotNet.DockerBuildTestImage(image + ".tests" , "SoftwarePioniere.ReadModel.Services.MongoDb.Tests");
-    MyDotNet.DockerComposeTestProject(image + ".tests" , "SoftwarePioniere.EventStore.Tests", artifactsDirectory);
+    MyDotNet.DockerComposeTestProject(image + ".tests" , "SoftwarePioniere.EventStore.Tests", artifactsDirectory, env1);
 
-   var env = new [] {
+    var env2 = new [] {
                  "SOPI_TESTS_EventStore__IpEndPoint=node1",
-                 "SOPI_TESTS_EventStore__ClusterIpEndpoints=[\"node1\",\"node2\",\"node3\"]"
-         };
+                 "SOPI_TESTS_EventStore__ClusterIpEndpoints:0=node1",
+                 "SOPI_TESTS_EventStore__ClusterIpEndpoints:1=node2",
+                 "SOPI_TESTS_EventStore__ClusterIpEndpoints:2=node3"
+        };
 
-    MyDotNet.DockerComposeTestProject(image + ".cluster.tests" , "SoftwarePioniere.EventStore.Cluster.Tests", artifactsDirectory, env);
+    MyDotNet.DockerComposeTestProject(image + ".cluster.tests" , "SoftwarePioniere.EventStore.Cluster.Tests", artifactsDirectory, env2);
 });
 
 
