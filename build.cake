@@ -199,15 +199,17 @@ Task("DockerTest")
     .Does(context =>
 {
 
-    // var env = new [] {
-    //             $"SOPI_TESTS_MONGODB__PORT={EnvironmentVariable("SOPI_TESTS_MONGODB__PORT")}",
-    //             $"SOPI_TESTS_MONGODB__DATABASEID=sopi-test-run"
-    //     };
+
 
 //   MyDotNet.DockerBuildTestImage(image + ".tests" , "SoftwarePioniere.ReadModel.Services.MongoDb.Tests");
-   MyDotNet.DockerComposeTestProject(image + ".tests" , "SoftwarePioniere.EventStore.Tests", artifactsDirectory);
+    MyDotNet.DockerComposeTestProject(image + ".tests" , "SoftwarePioniere.EventStore.Tests", artifactsDirectory);
 
+   var env = new [] {
+                 "SOPI_TESTS_EventStore__IpEndPoint=node1",
+                 "SOPI_TESTS_EventStore__ClusterIpEndpoints=[\"node1\",\"node2\",\"node3\"]"
+         };
 
+    MyDotNet.DockerComposeTestProject(image + ".cluster.tests" , "SoftwarePioniere.EventStore.Cluster.Tests", artifactsDirectory, env);
 });
 
 

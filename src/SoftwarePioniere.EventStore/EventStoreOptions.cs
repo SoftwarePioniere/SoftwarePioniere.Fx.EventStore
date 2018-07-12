@@ -1,10 +1,17 @@
 using System;
+using System.Text;
 using EventStore.ClientAPI;
 
 namespace SoftwarePioniere.EventStore
 {
     public class EventStoreOptions
     {
+        public EventStoreOptions()
+        {
+            ClusterIpEndpoints = new string[0];
+            ClusterHttpPorts = new int[0];
+        }
+
         /// <summary>
         /// Customizen der Connection Settings
         /// </summary>
@@ -66,8 +73,27 @@ namespace SoftwarePioniere.EventStore
         /// </summary>
         public string OpsUsername { get; set; } = "ops";
 
+        public bool UseCluster { get; set; }
+
+        public string[] ClusterIpEndpoints { get; set; }
+
+        public int[] ClusterHttpPorts { get; set; }
+
         public override string ToString()
         {
+            if (UseCluster)
+            {
+                var sb = new StringBuilder();
+                foreach (var s in ClusterIpEndpoints)
+                {
+                    if (sb.Length > 0)
+                        sb.Append(",");
+
+                    sb.Append($"{s}");
+                }
+                return $"Cluster IpEndPoints: {sb} // Username: {OpsUsername} // TcpPort: {TcpPort} // HttpPort: {HttpPort} // UseSsl: {UseSslCertificate} //  SslTcpPort: {ExtSecureTcpPort}";
+
+            }
             return $"IpEndPoint: {IpEndPoint} // Username: {OpsUsername} // TcpPort: {TcpPort} // HttpPort: {HttpPort} // UseSsl: {UseSslCertificate} //  SslTcpPort: {ExtSecureTcpPort}";
         }
     }

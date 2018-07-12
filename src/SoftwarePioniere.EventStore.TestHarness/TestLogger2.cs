@@ -7,7 +7,7 @@ using Foundatio.Logging.Xunit;
 using Foundatio.Utility;
 using Microsoft.Extensions.Logging;
 
-namespace SoftwarePioniere.EventStore.Tests
+namespace SoftwarePioniere.EventStore
 {
     internal class TestLogger2 : ILogger
     {

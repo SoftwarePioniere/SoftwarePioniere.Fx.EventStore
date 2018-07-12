@@ -9,7 +9,7 @@ using SoftwarePioniere.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace SoftwarePioniere.EventStore.Tests
+namespace SoftwarePioniere.EventStore.Cluster.Tests
 {
     public class EventStoreConnectionProviderTests : TestBase
     {
@@ -59,22 +59,22 @@ namespace SoftwarePioniere.EventStore.Tests
 
         public EventStoreConnectionProviderTests(ITestOutputHelper output) : base(output)
         {
-            
-         
+
+
             var loggerConfiguration = new LoggerConfiguration()
                     .MinimumLevel.Verbose()
                     .WriteTo.Console()
-//#if !DEBUG
+                    //#if !DEBUG
                     .WriteTo.File("/testresults/log.txt")
-//#endif
+                //#endif
 
                 ;
-//           log.Debug("Test Loggy");
+            //           log.Debug("Test Loggy");
 
             var lf = new TestLoggerSerilogFactory(output, loggerConfiguration);
             ServiceCollection
                 .AddSingleton<ILoggerFactory>(lf);
-            
+
             //Log.AddSerilog(loggerConfiguration);
 
             //output.WriteLine("ctor");

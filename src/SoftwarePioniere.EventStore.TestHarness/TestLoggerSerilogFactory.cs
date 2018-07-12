@@ -8,7 +8,7 @@ using Serilog.Core;
 using Xunit.Abstractions;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
-namespace SoftwarePioniere.EventStore.Tests
+namespace SoftwarePioniere.EventStore
 {
     public class TestLoggerSerilogFactory : ILoggerFactory
     {

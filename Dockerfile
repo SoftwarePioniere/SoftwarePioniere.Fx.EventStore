@@ -10,6 +10,7 @@ COPY src/SoftwarePioniere.EventStore.TestHarness/*.csproj ./src/SoftwarePioniere
 COPY src/SoftwarePioniere.Projections.Services.EventStore/*.csproj ./src/SoftwarePioniere.Projections.Services.EventStore/
 
 COPY test/SoftwarePioniere.EventStore.Tests/*.csproj ./test/SoftwarePioniere.EventStore.Tests/
+COPY test/SoftwarePioniere.EventStore.Cluster.Tests/*.csproj ./test/SoftwarePioniere.EventStore.Cluster.Tests/
 RUN dotnet restore SoftwarePioniere.Fx.EventStore.sln
 
 FROM restore as src

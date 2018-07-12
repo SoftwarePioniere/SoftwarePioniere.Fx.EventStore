@@ -7,6 +7,9 @@ using EventStore.ClientAPI.SystemData;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace SoftwarePioniere.EventStore
 {
@@ -33,60 +36,85 @@ namespace SoftwarePioniere.EventStore
             OpsCredentials = new UserCredentials(options.OpsUsername, options.OpsPassword);
             AdminCredentials = new UserCredentials(options.AdminUsername, options.AdminPassword);
 
-            if (Options.UseSslCertificate)
+            Connection = new Lazy<IEventStoreConnection>(() =>
             {
-                _logger.LogInformation("GetEventStore: with SSL IP: {0}:{1} // User: {2}", options.IpEndPoint, options.ExtSecureTcpPort, options.OpsUsername);
+                _logger.LogDebug("Creating Connection");
 
-                Connection = new Lazy<IEventStoreConnection>(() =>
-                {
-                    _logger.LogDebug("Creating Connection");
-
-                    var set = ConnectionSettings.Create()
+                IEventStoreConnection con;
+                var connectionSettingsBuilder = ConnectionSettings.Create()
                     .KeepReconnecting()
                     .KeepRetrying();
 
-                    options.ConnectionSetup?.Invoke(set);
+                options.ConnectionSetup?.Invoke(connectionSettingsBuilder);
 
-                    var ipa = GetHostIp(Options.IpEndPoint);
-                    var url = $"tcp://{ipa.MapToIPv4()}:{Options.ExtSecureTcpPort}";
-                    set.UseSslConnection(Options.SslTargetHost, Options.SslValidateServer);
-                    var uri = new Uri(url);
-                    var con = EventStoreConnection.Create(set, uri);
-                    RegisterEvents(con);
-                    con.ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-
-                    return con;
-
-                });
-
-            }
-            else
-            {
-                _logger.LogInformation("GetEventStore: without SSL IP: {0}:{1} // User: {2}", options.IpEndPoint, options.TcpPort, options.OpsUsername);
-
-                Connection = new Lazy<IEventStoreConnection>(() =>
+                if (!Options.UseCluster)
                 {
-                    _logger.LogDebug("Creating Connection");
-
-                    var set = ConnectionSettings.Create()
-                        .KeepReconnecting()
-                        .KeepRetrying();
-
-                    options.ConnectionSetup?.Invoke(set);
-
-
                     var ipa = GetHostIp(Options.IpEndPoint);
 
-                    var url = $"tcp://{ipa.MapToIPv4()}:{Options.TcpPort}";
-                    var uri = new Uri(url);
-                    var con = EventStoreConnection.Create(set, uri);
-                    RegisterEvents(con);
-                    con.ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                    return con;
+                    if (Options.UseSslCertificate)
+                    {
+                        _logger.LogInformation("GetEventStore: with SSL IP: {0}:{1} // User: {2}", options.IpEndPoint, options.ExtSecureTcpPort, options.OpsUsername);
 
-                });
-            }
+                        var url = $"tcp://{ipa.MapToIPv4()}:{Options.ExtSecureTcpPort}";
+                        connectionSettingsBuilder.UseSslConnection(Options.SslTargetHost, Options.SslValidateServer);
+                        var uri = new Uri(url);
+                        con = EventStoreConnection.Create(connectionSettingsBuilder, uri);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("GetEventStore: without SSL IP: {0}:{1} // User: {2}", options.IpEndPoint, options.TcpPort, options.OpsUsername);
 
+                        var url = $"tcp://{ipa.MapToIPv4()}:{Options.TcpPort}";
+                        var uri = new Uri(url);
+                        con = EventStoreConnection.Create(connectionSettingsBuilder, uri);
+                    }
+
+                }
+                else
+                {
+                    if (Options.UseSslCertificate)
+                    {
+                        var ipa = GetHostIp(Options.IpEndPoint);
+                        var url = $"tcp://{ipa.MapToIPv4()}:{Options.ExtSecureTcpPort}";
+                        connectionSettingsBuilder.UseSslConnection(Options.SslTargetHost, Options.SslValidateServer);
+                    }
+
+
+                    _logger.LogInformation("GetEventStore: for Cluster // User: {0}", options.OpsUsername);
+                    con = CreateForCluster(connectionSettingsBuilder);
+                }
+
+                RegisterEvents(con);
+                con.ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+
+                return con;
+
+            });
+        }
+
+        private IEventStoreConnection CreateForCluster(ConnectionSettingsBuilder connectionSettingsBuilder)
+        {
+            var endpoints = Options.ClusterIpEndpoints.Select((x, i) =>
+            {
+                var ipa = GetHostIp(x);
+
+                if (Options.ClusterHttpPorts.Length >= i + 1)
+                {
+                    return new IPEndPoint(ipa, Options.ClusterHttpPorts[i]);
+                }
+
+                return new IPEndPoint(IPAddress.Parse(x), Options.TcpPort);
+
+            });
+
+            var clusterSettings = ClusterSettings.Create()
+                    .DiscoverClusterViaGossipSeeds()
+                    .SetGossipTimeout(TimeSpan.FromMilliseconds(500))
+                    .SetGossipSeedEndPoints(endpoints.ToArray())
+                ;
+
+            var con = EventStoreConnection.Create(connectionSettingsBuilder, clusterSettings);
+            return con;
         }
 
         public EventHandler ConnectionChanged { get; set; }
