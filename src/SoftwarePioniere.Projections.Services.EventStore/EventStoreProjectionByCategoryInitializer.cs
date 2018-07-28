@@ -3,15 +3,15 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SoftwarePioniere.EventStore;
 
-namespace SoftwarePioniere.DomainModel.Services.EventStore
+namespace SoftwarePioniere.Projections.Services.EventStore
 {
-    public class EventStoreInitializer : IEventStoreInitializer
+    public class EventStoreProjectionByCategoryInitializer : IEventStoreInitializer
     {
         private readonly EventStoreSetup _setup;
 
         private readonly ILogger _logger;
 
-        public EventStoreInitializer(ILoggerFactory loggerFactory
+        public EventStoreProjectionByCategoryInitializer(ILoggerFactory loggerFactory
             , EventStoreSetup setup)
         {
             _setup = setup;
@@ -19,7 +19,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             _logger = loggerFactory.CreateLogger(GetType());
         }
 
-        public async Task InitializeAsync(CancellationToken cancellationToken = default)
+        public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogInformation("InitializeAsync");
 
@@ -28,12 +28,8 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
                 _logger.LogDebug("Enable $by_category Projection");
                 await _setup.EnableProjectionAsync("$by_category");
             }
-
-            if (!await _setup.CheckOpsUserIsInAdminGroupAsync())
-            {
-                _logger.LogDebug("Adding Opsuser to Admin Group");
-                await _setup.AddOpsUserToAdminsAsync();
-            }
         }
+
+        public int ExecutionOrder { get; } = (int.MinValue + 1);
     }
 }

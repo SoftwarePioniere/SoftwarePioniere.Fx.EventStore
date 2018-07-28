@@ -87,7 +87,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         private EventStoreStreamCatchUpSubscription _sub;
 
-        public void StartSubscription(CancellationToken cancellationToken = default)
+        public void StartSubscription(CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogDebug("StartSubscription");
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using SoftwarePioniere.Projections;
 using SoftwarePioniere.Projections.Services.EventStore;
 
@@ -10,7 +11,7 @@ namespace SoftwarePioniere.Extensions.DependencyInjection
         public static IServiceCollection AddEventStoreProjectionServices(this IServiceCollection services)
         {
             return services
-                    .AddProjectionServices()   
+                    .AddTransient<IHostedService, ProjectionBackgroundService>()
                     .AddTransient<IProjectorRegistry, EventStoreProjectorRegistry>();
 
         }

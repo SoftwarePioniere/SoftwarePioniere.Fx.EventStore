@@ -36,7 +36,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         }
 
 
-        private async Task<bool> ReadStreamAsync(string stream, IQueue<ProjectionEventData> queue, CancellationToken cancellationToken = default)
+        private async Task<bool> ReadStreamAsync(string stream, IQueue<ProjectionEventData> queue, CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogDebug("ReadFromStreamAsync {Stream}", stream);
 
@@ -111,7 +111,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         }
 
-        public async Task InitializeAsync(CancellationToken cancellationToken = default)
+        public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogInformation("InitializeAsync");
 

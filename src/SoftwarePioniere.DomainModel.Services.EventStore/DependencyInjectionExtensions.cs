@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using SoftwarePioniere.DomainModel;
 using SoftwarePioniere.DomainModel.Services.EventStore;
+using SoftwarePioniere.EventStore;
 
 // ReSharper disable once CheckNamespace
 namespace SoftwarePioniere.Extensions.DependencyInjection
@@ -12,9 +14,10 @@ namespace SoftwarePioniere.Extensions.DependencyInjection
             services
                 .AddDomainServices()
                 .AddSingleton<IEventStore, DomainEventStore>()
-                .AddSingleton<IEventStoreInitializer, EventStoreInitializer>()
+                .AddTransient<IHostedService, EventStoreInitializerBackgroundService>()
+                .AddSingleton<EventStore.IEventStoreInitializer, EventStoreSecurityInitializer>()
                 ;
-
+            
             return services;
         }
     }

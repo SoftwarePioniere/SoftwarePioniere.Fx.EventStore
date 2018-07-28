@@ -74,8 +74,8 @@ namespace SoftwarePioniere.EventStore
                 {
                     if (Options.UseSslCertificate)
                     {
-                        var ipa = GetHostIp(Options.IpEndPoint);
-                        var url = $"tcp://{ipa.MapToIPv4()}:{Options.ExtSecureTcpPort}";
+                        //var ipa = GetHostIp(Options.IpEndPoint);
+                     //   var url = $"tcp://{ipa.MapToIPv4()}:{Options.ExtSecureTcpPort}";
                         connectionSettingsBuilder.UseSslConnection(Options.SslTargetHost, Options.SslValidateServer);
                     }
 
