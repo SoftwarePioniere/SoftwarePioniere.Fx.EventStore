@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -31,8 +32,7 @@ namespace SoftwarePioniere.EventStore
 
             _logger = loggerFactory.CreateLogger(GetType());
             Options = options ?? throw new ArgumentNullException(nameof(options));
-            _hostIpAdress = null;
-
+            
             OpsCredentials = new UserCredentials(options.OpsUsername, options.OpsPassword);
             AdminCredentials = new UserCredentials(options.AdminUsername, options.AdminPassword);
 
@@ -75,7 +75,7 @@ namespace SoftwarePioniere.EventStore
                     if (Options.UseSslCertificate)
                     {
                         //var ipa = GetHostIp(Options.IpEndPoint);
-                     //   var url = $"tcp://{ipa.MapToIPv4()}:{Options.ExtSecureTcpPort}";
+                        //   var url = $"tcp://{ipa.MapToIPv4()}:{Options.ExtSecureTcpPort}";
                         connectionSettingsBuilder.UseSslConnection(Options.SslTargetHost, Options.SslValidateServer);
                     }
 
@@ -178,14 +178,14 @@ namespace SoftwarePioniere.EventStore
 
         public bool IsConfigured { get; private set; }
 
-        private IPAddress _hostIpAdress;
+        private IDictionary<string, IPAddress> _hostIpAddresses = new Dictionary<string, IPAddress>();
 
         private IPAddress GetHostIp(string ipEndpoint)
         {
             _logger.LogDebug("GetHostIp for IpEndPoint {IpEndPoint}", ipEndpoint);
 
-            if (_hostIpAdress != null)
-                return _hostIpAdress;
+            if (_hostIpAddresses.ContainsKey(ipEndpoint))
+                return _hostIpAddresses[ipEndpoint];
 
             if (!IPAddress.TryParse(ipEndpoint, out var ipa))
             {
@@ -200,19 +200,18 @@ namespace SoftwarePioniere.EventStore
 
                 if (hostIp.Length > 0)
                 {
-                    _hostIpAdress = hostIp.Last();
+
+                    var hostIpAdress = hostIp.Last();
+                    _hostIpAddresses.Add(ipEndpoint, hostIpAdress);
+                    return hostIpAdress;
                 }
-                else
-                {
-                    throw new InvalidOperationException("cannot resolve eventstore ip");
-                }
-            }
-            else
-            {
-                _hostIpAdress = ipa;
+
+                throw new InvalidOperationException("cannot resolve eventstore ip");
             }
 
-            return _hostIpAdress;
+            _hostIpAddresses.Add(ipEndpoint, ipa);
+            return ipa;
+
         }
 
         private IPEndPoint _httpEndpoint;
