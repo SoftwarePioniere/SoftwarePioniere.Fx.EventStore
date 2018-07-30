@@ -33,7 +33,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
             _entityStore = entityStore ?? throw new ArgumentNullException(nameof(entityStore));
             _projector = projector ?? throw new ArgumentNullException(nameof(projector));
-            
+
 
             Queue = new InMemoryQueue<ProjectionEventData>(new InMemoryQueueOptions<ProjectionEventData>()
             {
@@ -52,8 +52,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 await _projector.HandleAsync(entry.Value.EventData);
 
                 Status.LastCheckPoint = entry.Value.EventNumber;
-                
-                Status.ModifiedOnUtc = DateTime.UtcNow;                
+
+                Status.ModifiedOnUtc = DateTime.UtcNow;
                 await EntityStore.UpdateItemAsync(Status);
                 entry.MarkCompleted();
             }
@@ -93,9 +93,15 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             var cred = _connectionProvider.OpsCredentials;
             var src = _connectionProvider.Connection.Value;
+            long? lastCheckpoint = null;
+
+            if (Status.LastCheckPoint.HasValue && Status.LastCheckPoint != -1)
+            {
+                lastCheckpoint = Status.LastCheckPoint;
+            }
 
             _sub = src.SubscribeToStreamFrom(StreamName
-                , Status.LastCheckPoint
+                , lastCheckpoint
                 , CatchUpSubscriptionSettings.Default
                 , EventAppeared
                 , LiveProcessingStarted
@@ -121,7 +127,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         private async Task EventAppeared(EventStoreCatchUpSubscription sub, ResolvedEvent evt)
         {
             _logger.LogDebug("EventAppeared {SubscriptionName} {Stream}", sub.SubscriptionName, sub.StreamId);
-            
+
             var de = evt.Event.ToDomainEvent();
             var desc = new ProjectionEventData
             {
@@ -144,6 +150,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             Status = new ProjectionStatus();
             Status.SetEntityId(ProjectorId);
+            Status.LastCheckPoint = -1;
 
             await _initEntityStore.InsertItemAsync(Status);
 
