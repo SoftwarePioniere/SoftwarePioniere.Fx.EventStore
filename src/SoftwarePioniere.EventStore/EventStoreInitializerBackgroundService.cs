@@ -28,10 +28,20 @@ namespace SoftwarePioniere.EventStore
         {
             _logger.LogDebug("ExecuteAsync");
 
+            var done = new List<Type>();
+
+
             foreach (var initializer in _eventStoreInitializers.OrderBy(x => x.ExecutionOrder))
             {
-                _logger.LogDebug("InitializeAsync IEventStoreInitializer {EventStoreInitializer}", initializer.GetType().Name);
-                await initializer.InitializeAsync(stoppingToken);
+                if (!done.Contains(initializer.GetType()))
+                {
+
+                    _logger.LogDebug("InitializeAsync IEventStoreInitializer {EventStoreInitializer}",
+                        initializer.GetType().Name);
+                    await initializer.InitializeAsync(stoppingToken);
+
+                    done.Add(initializer.GetType());
+                }
             }
         }
     }

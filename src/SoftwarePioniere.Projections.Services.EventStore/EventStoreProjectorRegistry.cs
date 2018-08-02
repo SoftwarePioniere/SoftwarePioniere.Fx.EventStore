@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
@@ -115,12 +116,19 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         {
             _logger.LogInformation("InitializeAsync");
 
+            var streamsToCheck = _projectors.Select(x => x.StreamName).Distinct().ToArray();
+            foreach (var s in streamsToCheck)
+            {
+                _logger.LogDebug("Preparing Stream {StreamName}", s);
+                await InsertEmptyDomainEventIfStreamIsEmpty(s);
+            }
+
             foreach (var projector in _projectors)
             {
                 var projectorId = projector.GetType().FullName;
 
-                _logger.LogDebug("Preparing Stream for Projector {Projector}", projector.GetType().Name);
-                await InsertEmptyDomainEventIfStreamIsEmpty(projector.StreamName);
+                //_logger.LogDebug("Preparing Stream for Projector {Projector}", projector.GetType().Name);
+                //await InsertEmptyDomainEventIfStreamIsEmpty(projector.StreamName);
 
                 var context = new EventStoreProjectionContext(_loggerFactory, _connectionProvider, _entityStore, projector)
                 {
