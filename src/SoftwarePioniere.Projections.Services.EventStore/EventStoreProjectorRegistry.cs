@@ -37,7 +37,54 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         }
 
 
-        private async Task<bool> ReadStreamAsync(string stream, IQueue<ProjectionEventData> queue, CancellationToken cancellationToken = default(CancellationToken))
+        //private async Task<bool> ReadStreamAsync(string stream, IQueue<ProjectionEventData> queue, CancellationToken cancellationToken = default(CancellationToken))
+        //{
+        //    _logger.LogDebug("ReadFromStreamAsync {Stream}", stream);
+
+        //    var cred = _connectionProvider.OpsCredentials;
+        //    var src = _connectionProvider.Connection.Value;
+
+        //    StreamEventsSlice slice;
+
+        //    long sliceStart = StreamPosition.Start;
+
+
+        //    do
+        //    {
+        //        _logger.LogTrace("Reading Slice from {0}", sliceStart);
+
+        //        slice = await src.ReadStreamEventsForwardAsync(stream, sliceStart, 500, true, cred);
+        //        _logger.LogTrace("Next Event: {0} , IsEndOfStream: {1}", slice.NextEventNumber, slice.IsEndOfStream);
+
+        //        sliceStart = slice.NextEventNumber;
+
+        //        foreach (var ev in slice.Events)
+        //        {
+        //            if (cancellationToken.IsCancellationRequested)
+        //            {
+        //                _logger.LogWarning("Initialization Cancelled");
+        //                return false;
+        //            }
+
+        //            var de = ev.Event.ToDomainEvent();
+        //            var desc = new ProjectionEventData
+        //            {
+        //                EventData = de,
+        //                EventNumber = ev.OriginalEventNumber
+        //            };
+
+        //            _logger.LogTrace("Enqueue Event @{0}", desc);
+        //            await queue.EnqueueAsync(desc);
+
+        //        }
+
+        //    } while (!slice.IsEndOfStream);
+
+        //    return true;
+        //}
+
+
+        private async Task<bool> ReadStreamAsync(string stream, EventStoreProjectionContext context, CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogDebug("ReadFromStreamAsync {Stream}", stream);
 
@@ -67,14 +114,13 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     }
 
                     var de = ev.Event.ToDomainEvent();
-                    var desc = new ProjectionEventData
+                    var entry = new ProjectionEventData
                     {
                         EventData = de,
                         EventNumber = ev.OriginalEventNumber
                     };
-
-                    _logger.LogTrace("Enqueue Event @{0}", desc);
-                    await queue.EnqueueAsync(desc);
+                
+                    await context.HandleEventAsync(entry);
 
                 }
 
@@ -82,6 +128,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             return true;
         }
+
+
 
         private async Task InsertEmptyDomainEventIfStreamIsEmpty(string streamName)
         {
@@ -146,7 +194,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 {
                     //start init mode
                     await context.StartInitializationModeAsync();
-                    ReadStreamAsync(context.StreamName, context.Queue, cancellationToken).Wait(cancellationToken);
+                   // await ReadStreamAsync(context.StreamName, context.Queue, cancellationToken);
+                    await ReadStreamAsync(context.StreamName, context, cancellationToken);
 
                     QueueStats stats;
 

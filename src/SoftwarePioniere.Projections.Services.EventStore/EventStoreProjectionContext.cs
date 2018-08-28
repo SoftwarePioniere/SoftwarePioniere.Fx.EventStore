@@ -42,19 +42,32 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             Queue.StartWorkingAsync(HandleAsync);
         }
 
-        private async Task HandleAsync(IQueueEntry<ProjectionEventData> entry)
+        internal async Task HandleEventAsync(ProjectionEventData entry)
         {
-            Console.WriteLine($"Handled Item: {entry.Value.EventNumber}");
-            CurrentCheckPoint = entry.Value.EventNumber;
+            Console.WriteLine($"Handled Item: {entry.EventNumber}");
+            CurrentCheckPoint = entry.EventNumber;
 
             try
             {
-                await _projector.HandleAsync(entry.Value.EventData);
-
-                Status.LastCheckPoint = entry.Value.EventNumber;
-
+                await _projector.HandleAsync(entry.EventData);
+                Status.LastCheckPoint = entry.EventNumber;
                 Status.ModifiedOnUtc = DateTime.UtcNow;
-                await EntityStore.UpdateItemAsync(Status);
+                await EntityStore.UpdateItemAsync(Status);            
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while Processing Event {EventNumber} from {Stream}", entry.EventNumber, StreamName);
+                throw;
+            }
+        }
+
+        private async Task HandleAsync(IQueueEntry<ProjectionEventData> entry)
+        {
+            Console.WriteLine($"Handled Item: {entry.Value.EventNumber}");        
+
+            try
+            {
+                await HandleEventAsync(entry.Value);
                 entry.MarkCompleted();
             }
             catch (Exception e)
