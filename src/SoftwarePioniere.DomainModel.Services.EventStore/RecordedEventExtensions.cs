@@ -17,13 +17,10 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
             var eventHeaders = JsonConvert.DeserializeObject<Dictionary<string, string>>(meta);
 
-            if (!eventHeaders.ContainsKey(EventStoreConstants.EventShortClrTypeHeader))
-                throw new InvalidOperationException("EventShortClrTypeHeader Header not found");
+            if (!eventHeaders.ContainsKey(EventStoreConstants.EventTypeHeader))
+                throw new InvalidOperationException("EventTypeHeader Header not found");
 
-            var typeName = eventHeaders[EventStoreConstants.EventShortClrTypeHeader];
-
-
-
+            var typeName = eventHeaders[EventStoreConstants.EventTypeHeader];
 
             var eventClrType = Type.GetType(typeName, true);
             var o = JsonConvert.DeserializeObject(data, eventClrType);
@@ -31,17 +28,15 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             return (IDomainEvent)o;
         }
 
-
-
-        public static T ToDomainEvent<T>(this RecordedEvent recordedEvent)
+        public static T ToEvent<T>(this RecordedEvent recordedEvent)
         {
             var meta = recordedEvent.Metadata.FromUtf8();
             var eventHeaders = JsonConvert.DeserializeObject<Dictionary<string, string>>(meta);
 
-            if (!eventHeaders.ContainsKey(EventStoreConstants.EventShortClrTypeHeader))
-                throw new InvalidOperationException("EventShortClrTypeHeader Header not found");
+            if (!eventHeaders.ContainsKey(EventStoreConstants.EventTypeHeader))
+                throw new InvalidOperationException("EventTypeHeader Header not found");
 
-            if (!string.Equals(eventHeaders[EventStoreConstants.EventShortClrTypeHeader], typeof(T).GetTypeShortName()))
+            if (!string.Equals(eventHeaders[EventStoreConstants.EventTypeHeader], typeof(T).GetTypeShortName()))
                 throw new InvalidOperationException("Event is not compatible");
 
             var data = recordedEvent.GetJsonData();
@@ -56,16 +51,15 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
         }
 
-
-        public static Tuple<T, string> ToDomainEventWithJson<T>(this RecordedEvent recordedEvent)
+        public static Tuple<T, string> ToEventWithJson<T>(this RecordedEvent recordedEvent)
         {
             var meta = recordedEvent.Metadata.FromUtf8();
             var eventHeaders = JsonConvert.DeserializeObject<Dictionary<string, string>>(meta);
 
-            if (!eventHeaders.ContainsKey(EventStoreConstants.EventShortClrTypeHeader))
-                throw new InvalidOperationException("EventShortClrTypeHeader Header not found");
+            if (!eventHeaders.ContainsKey(EventStoreConstants.EventTypeHeader))
+                throw new InvalidOperationException("EventTypeHeader Header not found");
 
-            if (!string.Equals(eventHeaders[EventStoreConstants.EventShortClrTypeHeader], (typeof(T).GetTypeShortName())))
+            if (!string.Equals(eventHeaders[EventStoreConstants.EventTypeHeader], (typeof(T).GetTypeShortName())))
                 throw new InvalidOperationException("Event is not compatible");
 
             var data = recordedEvent.Data.FromUtf8();

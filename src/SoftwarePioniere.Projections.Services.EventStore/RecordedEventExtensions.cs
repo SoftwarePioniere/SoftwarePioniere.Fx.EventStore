@@ -16,12 +16,11 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             var eventHeaders = JsonConvert.DeserializeObject<Dictionary<string, string>>(meta);
 
-            if (!eventHeaders.ContainsKey(EventStoreConstants.EventShortClrTypeHeader))
-                throw new InvalidOperationException("EventShortClrTypeHeader Header not found");
+            if (!eventHeaders.ContainsKey(EventStoreConstants.EventTypeHeader))
+                throw new InvalidOperationException("EventTypeHeader Header not found");
 
-            var typeName = eventHeaders[EventStoreConstants.EventShortClrTypeHeader];
-
-
+            var typeName = eventHeaders[EventStoreConstants.EventTypeHeader];
+            
             var eventClrType = Type.GetType(typeName, true);
             var o = JsonConvert.DeserializeObject(data, eventClrType);
 

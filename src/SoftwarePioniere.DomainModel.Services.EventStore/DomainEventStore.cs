@@ -58,12 +58,23 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             return true;
         }
 
+        public Task<bool> CheckAggregateExists<T>(string aggregateId, string streamName) where T : AggregateRoot
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<IList<EventDescriptor>> GetEventsForAggregateAsync<T>(string aggregateId) where T : AggregateRoot
         {
             _logger.LogInformation("GetEventsForAggregate {type} {AggregateId}", typeof(T), aggregateId);
-            return GetEventsForAggregateAsync<T>(aggregateId, int.MaxValue);
+            var streamName = _aggregateIdToStreamName(typeof(T), aggregateId);
+            return GetEventsForAggregateAsync<T>(aggregateId, int.MaxValue, streamName);
         }
 
+        public Task<IList<EventDescriptor>> GetEventsForAggregateAsync<T>(string aggregateId, string streamName) where T : AggregateRoot
+        {
+            _logger.LogInformation("GetEventsForAggregate {type} {AggregateId} {StreamName}", typeof(T), aggregateId, streamName);
+            return GetEventsForAggregateAsync<T>(aggregateId, int.MaxValue, streamName);
+        }
 
         public async Task SaveEventsAsync<T>(string aggregateId, IEnumerable<IDomainEvent> events, int aggregateVersion)
             where T : AggregateRoot
@@ -89,8 +100,8 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
             var eventHeaders = new Dictionary<string, string>
             {
-                {EventStoreConstants.AggregateNameTypeHeader, t.AssemblyQualifiedName},
-                {EventStoreConstants.AggregateShortClrTypeHeader, t.GetTypeShortName()},
+              //  {EventStoreConstants.AggregateNameTypeHeader, t.AssemblyQualifiedName},
+             //   {EventStoreConstants.AggregateShortClrTypeHeader, t.GetTypeShortName()},
                 {EventStoreConstants.AggregateIdHeader, aggregateId}
             };
 
@@ -162,12 +173,12 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
         }
 
         private async Task<IList<EventDescriptor>> GetEventsForAggregateAsync<T>(string aggregateId,
-            int aggregateVersion)
+            int aggregateVersion, string streamName)
             where T : AggregateRoot
         {
             IList<EventDescriptor> result = new List<EventDescriptor>();
 
-            var streamName = _aggregateIdToStreamName(typeof(T), aggregateId);
+            //   var streamName = _aggregateIdToStreamName(typeof(T), aggregateId);
             //var sliceStart = 1; //Ignores $StreamCreated
             long sliceStart = 0; //Ignores $StreamCreated
             StreamEventsSlice currentSlice;

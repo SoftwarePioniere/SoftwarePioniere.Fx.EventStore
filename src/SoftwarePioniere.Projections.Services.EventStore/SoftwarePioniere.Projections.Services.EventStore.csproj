@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoftwarePioniere.Projections.Abstractions" Version="0.2.19" />
-    <PackageReference Include="SoftwarePioniere.ReadModel.Services" Version="0.2.19" />
+    <PackageReference Include="SoftwarePioniere.Projections.Abstractions" Version="0.2.21" />
+    <PackageReference Include="SoftwarePioniere.ReadModel.Services" Version="0.2.21" />
   </ItemGroup>
 
   <ItemGroup>

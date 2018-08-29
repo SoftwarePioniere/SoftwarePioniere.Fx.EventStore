@@ -9,10 +9,10 @@ using SoftwarePioniere.Messaging;
 namespace SoftwarePioniere.DomainModel.Services.EventStore
 {
 
-    public static class DomainEventExtensions
+    public static class MessageExtensions
     {
 
-        public static EventData ToEventData(this IDomainEvent evnt, IDictionary<string, string> headers)
+        public static EventData ToEventData(this IMessage evnt, IDictionary<string, string> headers)
         {
             var data = JsonConvert.SerializeObject(evnt).ToUtf8();
 
@@ -23,8 +23,8 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
             var eventHeaders = new Dictionary<string, string>(headers)
             {
-                {  EventStoreConstants.EventClrTypeHeader, type.AssemblyQualifiedName},
-                {  EventStoreConstants.EventShortClrTypeHeader, type.GetTypeShortName()},
+              //  {  EventStoreConstants.EventClrTypeHeader, type.AssemblyQualifiedName},
+                {  EventStoreConstants.EventTypeHeader, type.GetTypeShortName()},
                 {  EventStoreConstants.ServerTimeStampUtcHeader, DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture)}
 
             };
