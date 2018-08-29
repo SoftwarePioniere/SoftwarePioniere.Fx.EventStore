@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.2.18" />
+    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.2.19" />
   </ItemGroup>
 
   <ItemGroup>
