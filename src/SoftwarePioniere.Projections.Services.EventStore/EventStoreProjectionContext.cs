@@ -27,13 +27,11 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             , IReadModelProjector projector
         )
         {
-
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _logger = loggerFactory.CreateLogger(GetType());
             _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
             _entityStore = entityStore ?? throw new ArgumentNullException(nameof(entityStore));
             _projector = projector ?? throw new ArgumentNullException(nameof(projector));
-
 
             Queue = new InMemoryQueue<ProjectionEventData>(new InMemoryQueueOptions<ProjectionEventData>()
             {
@@ -44,7 +42,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         internal async Task HandleEventAsync(ProjectionEventData entry)
         {
-            Console.WriteLine($"Handled Item: {entry.EventNumber}");
+            _logger.LogDebug("Handled Item {EventNumber} {StreamName} {ProjectorId}", entry.EventNumber, StreamName, ProjectorId);
             CurrentCheckPoint = entry.EventNumber;
 
             try
@@ -52,18 +50,18 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 await _projector.HandleAsync(entry.EventData);
                 Status.LastCheckPoint = entry.EventNumber;
                 Status.ModifiedOnUtc = DateTime.UtcNow;
-                await EntityStore.UpdateItemAsync(Status);            
+                await EntityStore.UpdateItemAsync(Status);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while Processing Event {EventNumber} from {Stream}", entry.EventNumber, StreamName);
+                _logger.LogError(e, "Error while Processing Event {EventNumber} from {StreamName} {ProjectorId}", entry.EventNumber, StreamName, ProjectorId);
                 throw;
             }
         }
 
         private async Task HandleAsync(IQueueEntry<ProjectionEventData> entry)
         {
-            Console.WriteLine($"Handled Item: {entry.Value.EventNumber}");        
+            _logger.LogDebug("Handled Item {EventNumber}", entry.Value.EventNumber);
 
             try
             {
@@ -72,7 +70,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while Processing Event {EventNumber} from {Stream}", entry.Value.EventNumber, StreamName);
+                _logger.LogError(e, "Error while Processing Event {EventNumber} from {Stream} {ProjectorId}", entry.Value.EventNumber, StreamName, ProjectorId);
                 throw;
             }
         }
@@ -102,7 +100,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         public void StartSubscription(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _logger.LogDebug("StartSubscription");
+            _logger.LogDebug("StartSubscription for Projector {ProjectorId} on {Stream}", ProjectorId, StreamName);
 
             var cred = _connectionProvider.OpsCredentials;
             var src = _connectionProvider.Connection.Value;
@@ -126,20 +124,21 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         private void SubscriptionDropped(EventStoreCatchUpSubscription sub, SubscriptionDropReason reason, Exception ex)
         {
-            _logger.LogError("SubscriptionDropped on StreamId {StreamId}, Reason: {Reason}, Error: {Error}",
+            _logger.LogError(ex, "SubscriptionDropped on StreamId {StreamId}, Projector {ProjectorId}, Reason: {Reason}",
                 sub.StreamId,
-                reason.ToString(), ex?.Message);
+                ProjectorId,
+                reason.ToString());
         }
 
         private void LiveProcessingStarted(EventStoreCatchUpSubscription sub)
         {
-            _logger.LogDebug("LiveProcessingStarted on StreamId {StreamId}", sub.StreamId);
+            _logger.LogDebug("LiveProcessingStarted on StreamId {StreamId}, Projector {ProjectorId}", sub.StreamId, ProjectorId);
             IsLiveProcessing = true;
         }
 
         private async Task EventAppeared(EventStoreCatchUpSubscription sub, ResolvedEvent evt)
         {
-            _logger.LogDebug("EventAppeared {SubscriptionName} {Stream}", sub.SubscriptionName, sub.StreamId);
+            _logger.LogDebug("EventAppeared {SubscriptionName} {Stream} Projector {ProjectorId}", sub.SubscriptionName, sub.StreamId, ProjectorId);
 
             var de = evt.Event.ToDomainEvent();
             var desc = new ProjectionEventData
@@ -155,8 +154,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         {
             _logger.LogDebug("StartInitializationMode");
 
-            _initEntityStore = new InMemoryEntityStore(_loggerFactory, NullCacheClient.Instance,
-                new InMemoryEntityStoreConnectionProvider());
+            _initEntityStore = new InMemoryEntityStore(_loggerFactory, NullCacheClient.Instance, new InMemoryEntityStoreConnectionProvider());
 
             InitializationMode = true;
             IsLiveProcessing = false;

@@ -38,9 +38,16 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
                                        throw new ArgumentNullException(nameof(aggregateIdToStreamName));
         }
 
-        public async Task<bool> CheckAggregateExists<T>(string aggregateId) where T : AggregateRoot
+        public Task<bool> CheckAggregateExists<T>(string aggregateId) where T : AggregateRoot
         {
             var streamName = _aggregateIdToStreamName(typeof(T), aggregateId);
+            return CheckAggregateExists<T>(aggregateId, streamName);
+        }
+
+        public async Task<bool> CheckAggregateExists<T>(string aggregateId, string streamName) where T : AggregateRoot
+        {
+            _logger.LogDebug("CheckAggregateExists {type} {AggregateId} {StreamName}", typeof(T), aggregateId, streamName);
+
             //var sliceStart = 1; //Ignores $StreamCreated
             long sliceStart = 0; //Ignores $StreamCreated
 
@@ -52,35 +59,30 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
             if (currentSlice.Status == SliceReadStatus.StreamNotFound)
             {
+                _logger.LogDebug("CheckAggregateExists {type} {AggregateId} {StreamName} not found", typeof(T), aggregateId, streamName);
                 return false;
             }
 
             return true;
         }
 
-        public Task<bool> CheckAggregateExists<T>(string aggregateId, string streamName) where T : AggregateRoot
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<IList<EventDescriptor>> GetEventsForAggregateAsync<T>(string aggregateId) where T : AggregateRoot
         {
-            _logger.LogInformation("GetEventsForAggregate {type} {AggregateId}", typeof(T), aggregateId);
+            _logger.LogDebug("GetEventsForAggregate {type} {AggregateId}", typeof(T), aggregateId);
             var streamName = _aggregateIdToStreamName(typeof(T), aggregateId);
             return GetEventsForAggregateAsync<T>(aggregateId, int.MaxValue, streamName);
         }
 
         public Task<IList<EventDescriptor>> GetEventsForAggregateAsync<T>(string aggregateId, string streamName) where T : AggregateRoot
         {
-            _logger.LogInformation("GetEventsForAggregate {type} {AggregateId} {StreamName}", typeof(T), aggregateId, streamName);
+            _logger.LogDebug("GetEventsForAggregate {type} {AggregateId} {StreamName}", typeof(T), aggregateId, streamName);
             return GetEventsForAggregateAsync<T>(aggregateId, int.MaxValue, streamName);
         }
 
         public async Task SaveEventsAsync<T>(string aggregateId, IEnumerable<IDomainEvent> events, int aggregateVersion)
             where T : AggregateRoot
         {
-            _logger.LogInformation("SaveEvents {type} {AggregateId} {AggregateVersion}", typeof(T), aggregateId,
-                aggregateVersion);
+            _logger.LogDebug("SaveEvents {type} {AggregateId} {AggregateVersion}", typeof(T), aggregateId, aggregateVersion);
             var t = typeof(T);
 
             var connection = _provider.Connection;
@@ -176,6 +178,8 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             int aggregateVersion, string streamName)
             where T : AggregateRoot
         {
+            _logger.LogDebug("GetEventsForAggregateAsync {type} {AggregateId} {AggregateVersion}", typeof(T), aggregateId, aggregateVersion);
+
             IList<EventDescriptor> result = new List<EventDescriptor>();
 
             //   var streamName = _aggregateIdToStreamName(typeof(T), aggregateId);

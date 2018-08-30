@@ -41,15 +41,18 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 if (!done.Contains(initializer.GetType()))
                 {
 
-                    _logger.LogDebug("InitializeAsync IEventStoreInitializer {EventStoreInitializer}",
+                    _logger.LogInformation("Initialize IEventStoreInitializer {EventStoreInitializer}",
                         initializer.GetType().Name);
                     await initializer.InitializeAsync(stoppingToken);
 
                     done.Add(initializer.GetType());
+                } else
+                {
+                    _logger.LogDebug("IEventStoreInitializer {EventStoreInitializer} already processed", initializer.GetType().Name);
                 }
             }
 
-            _logger.LogDebug("IProjectorRegistry InitializeAsync");
+            _logger.LogDebug("Initialize IProjectorRegistry");
             await _projectorRegistry.InitializeAsync(stoppingToken);
 
         }

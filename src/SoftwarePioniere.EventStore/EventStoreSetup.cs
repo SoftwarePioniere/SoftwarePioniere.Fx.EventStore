@@ -48,16 +48,16 @@ namespace SoftwarePioniere.EventStore
             }
         }
 
-        public void AllowOpsUserOnStream(string name)
-        {
-            _logger.LogDebug("AllowOpsUserOnStream: {StreamName}", name);
+        //public void AllowOpsUserOnStream(string name)
+        //{
+        //    _logger.LogDebug("AllowOpsUserOnStream: {StreamName}", name);
 
-            //var conn = _provider._provider.Connection.Value.Value;
+        //    //var conn = _provider._provider.Connection.Value.Value;
 
-            //  var set = new SystemSettings(new StreamAcl(),  );
+        //    //  var set = new SystemSettings(new StreamAcl(),  );
 
-            throw new NotImplementedException();
-        }
+        //    throw new NotImplementedException();
+        //}
 
         public async Task<bool> CheckContinousProjectionIsCreatedAsync(string name, string query)
         {

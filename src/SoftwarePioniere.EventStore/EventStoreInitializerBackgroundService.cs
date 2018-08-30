@@ -30,17 +30,20 @@ namespace SoftwarePioniere.EventStore
 
             var done = new List<Type>();
 
-
             foreach (var initializer in _eventStoreInitializers.OrderBy(x => x.ExecutionOrder))
             {
                 if (!done.Contains(initializer.GetType()))
                 {
 
-                    _logger.LogDebug("InitializeAsync IEventStoreInitializer {EventStoreInitializer}",
+                    _logger.LogInformation("Initialize IEventStoreInitializer {EventStoreInitializer}",
                         initializer.GetType().Name);
                     await initializer.InitializeAsync(stoppingToken);
 
                     done.Add(initializer.GetType());
+                }
+                else
+                {
+                    _logger.LogDebug("IEventStoreInitializer {EventStoreInitializer} already processed", initializer.GetType().Name);
                 }
             }
         }

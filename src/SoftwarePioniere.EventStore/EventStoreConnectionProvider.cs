@@ -253,7 +253,7 @@ namespace SoftwarePioniere.EventStore
 
         public async Task<bool> IsStreamEmptyAsync(string streamName)
         {
-            _logger.LogInformation("IsStreamEmptyAsync {StreamName}", streamName);
+            _logger.LogDebug("IsStreamEmptyAsync {StreamName}", streamName);
 
             //EventReadResult firstEvent = null;
             //try
@@ -280,7 +280,7 @@ namespace SoftwarePioniere.EventStore
             var con = Connection.Value;
 
             var slice = await con.ReadStreamEventsForwardAsync(streamName, 0, 1, false, AdminCredentials).ConfigureAwait(false);
-            _logger.LogInformation("StreamExists {StreamName} : SliceStatus: {SliceStatus}", streamName, slice.Status);
+            _logger.LogDebug("StreamExists {StreamName} : SliceStatus: {SliceStatus}", streamName, slice.Status);
 
             if (slice.Status == SliceReadStatus.StreamNotFound)
             {
@@ -296,7 +296,7 @@ namespace SoftwarePioniere.EventStore
             //    ret = true;
             //}
 
-            _logger.LogInformation("StreamExists {StreamName} {IsEmpty}", streamName, ret);
+            _logger.LogInformation("IsStreamEmptyAsync {StreamName} {IsEmpty}", streamName, ret);
 
             return ret;
 

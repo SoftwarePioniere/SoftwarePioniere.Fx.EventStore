@@ -14,7 +14,6 @@ namespace SoftwarePioniere.EventStore
             , EventStoreSetup setup)
         {
             _setup = setup;
-
             _logger = loggerFactory.CreateLogger(GetType());
         }
 

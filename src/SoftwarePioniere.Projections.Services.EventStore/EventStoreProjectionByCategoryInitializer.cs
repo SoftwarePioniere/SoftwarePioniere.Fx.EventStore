@@ -21,11 +21,11 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _logger.LogInformation("InitializeAsync");
+            _logger.LogDebug("InitializeAsync");
 
             if (!await _setup.CheckProjectionIsRunningAsync("$by_category"))
             {
-                _logger.LogDebug("Enable $by_category Projection");
+                _logger.LogInformation("Enabling $by_category Projection");
                 await _setup.EnableProjectionAsync("$by_category");
             }
         }
