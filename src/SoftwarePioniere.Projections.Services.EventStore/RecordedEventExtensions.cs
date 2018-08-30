@@ -20,11 +20,11 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 throw new InvalidOperationException("EventTypeHeader Header not found");
 
             var typeName = eventHeaders[EventStoreConstants.EventTypeHeader];
-            
+
             var eventClrType = Type.GetType(typeName, true);
             var o = JsonConvert.DeserializeObject(data, eventClrType);
 
-            return (IDomainEvent)o;
+            return o as IDomainEvent;
         }
     }
 }

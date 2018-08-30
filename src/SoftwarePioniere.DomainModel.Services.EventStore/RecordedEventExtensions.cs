@@ -25,7 +25,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             var eventClrType = Type.GetType(typeName, true);
             var o = JsonConvert.DeserializeObject(data, eventClrType);
 
-            return (IDomainEvent)o;
+            return o as IDomainEvent;
         }
 
         public static T ToEvent<T>(this RecordedEvent recordedEvent)
