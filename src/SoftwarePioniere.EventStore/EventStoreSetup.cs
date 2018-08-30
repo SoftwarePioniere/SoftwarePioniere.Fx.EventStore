@@ -227,7 +227,7 @@ namespace SoftwarePioniere.EventStore
             var i = 1;
             while (i < 10 && !isRunning)
             {
-                _logger.LogDebug("Waiting for Projection {ProjectionName} enabled. {i}", name);
+                _logger.LogDebug("Waiting for Projection {ProjectionName} enabled.", name);
                 await Task.Delay(2000).ConfigureAwait(false);
                 i++;
                 isRunning = await CheckProjectionIsRunningAsync(name).ConfigureAwait(false);
