@@ -112,14 +112,25 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                         return false;
                     }
 
-                    var de = ev.Event.ToDomainEvent();
-                    var entry = new ProjectionEventData
+                    try
                     {
-                        EventData = de,
-                        EventNumber = ev.OriginalEventNumber
-                    };
+                        var de = ev.Event.ToDomainEvent();
 
-                    await context.HandleEventAsync(entry);
+                        if (de != null)
+                        {
+                            var entry = new ProjectionEventData
+                            {
+                                EventData = de,
+                                EventNumber = ev.OriginalEventNumber
+                            };
+
+                            await context.HandleEventAsync(entry);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Error Reading Event: {Stream} {ProjectorId} {OriginalEventNumber}", stream, context.ProjectorId, ev.OriginalEventNumber);
+                    }
 
                 }
 
@@ -175,7 +186,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 var projectorId = projector.GetType().FullName;
 
                 _logger.LogInformation("Initialize Projector {ProjectorName}", projector.GetType().Name);
-                
+
                 //await InsertEmptyDomainEventIfStreamIsEmpty(projector.StreamName);
 
                 var context = new EventStoreProjectionContext(_loggerFactory, _connectionProvider, _entityStore, projector)
