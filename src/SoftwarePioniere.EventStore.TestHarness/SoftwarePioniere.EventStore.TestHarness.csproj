@@ -7,17 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="files\FakeCounterProjection.js" />
     <None Remove="files\TestSubscription.js" />
     <None Remove="files\TestSubscription1.js" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="files\FakeCounterProjection.js" />
     <EmbeddedResource Include="files\TestSubscription.js" />
     <EmbeddedResource Include="files\TestSubscription1.js" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoftwarePioniere.TestHarness" Version="0.2.22" />
+    <PackageReference Include="SoftwarePioniere.TestHarness" Version="0.2.24" />
     <PackageReference Include="Serilog" Version="2.7.1" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />

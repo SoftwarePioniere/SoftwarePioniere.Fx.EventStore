@@ -21,6 +21,8 @@ namespace SoftwarePioniere.EventStore.Tests
             ServiceCollection.AddEventStoreDomainServices();
         }
 
+
+
         [Fact]
         public override Task CheckAggregateExists()
         {

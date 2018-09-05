@@ -16,12 +16,12 @@ namespace SoftwarePioniere.EventStore
 
         public EventStoreSetup(EventStoreConnectionProvider provider, ILoggerFactory loggerFactory)
         {
-             if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
+            if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
             _logger = loggerFactory.CreateLogger(GetType());
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
 
         }
-        
+
         public async Task AddOpsUserToAdminsAsync()
         {
             _logger.LogDebug("AddOpsUserToAdminsAsync");
@@ -32,7 +32,7 @@ namespace SoftwarePioniere.EventStore
                 return;
             }
 
-            var manager = CreateUsersManager();
+            var manager = _provider.CreateUsersManager();
 
             var ops = await manager.GetUserAsync("ops", _provider.AdminCredentials).ConfigureAwait(false);
             if (ops.Groups == null || ops.Groups != null && !ops.Groups.Contains("$admins"))
@@ -63,7 +63,7 @@ namespace SoftwarePioniere.EventStore
         {
             _logger.LogDebug("CheckContinousProjectionAsync: {ProjectionName}", name);
 
-            var manager = CreateProjectionsManager();
+            var manager = _provider.CreateProjectionsManager();
 
             var list = await manager.ListContinuousAsync(_provider.AdminCredentials).ConfigureAwait(false);
             var proj = list.FirstOrDefault(x => x.Name == name);
@@ -103,7 +103,7 @@ namespace SoftwarePioniere.EventStore
         {
             _logger.LogDebug("CheckProjectionIsRunningAsync: {ProjectionName}", name);
 
-            var manager = CreateProjectionsManager();
+            var manager = _provider.CreateProjectionsManager();
 
             var list = await manager.ListContinuousAsync(_provider.AdminCredentials).ConfigureAwait(false);
 
@@ -125,12 +125,8 @@ namespace SoftwarePioniere.EventStore
             var clean = dirty.Replace(" ", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
             return clean;
         }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="query"></param>
-        public async Task CreateContinousProjectionAsync(string name, string query)
+        
+        public async Task CreateContinousProjectionAsync(string name, string query, bool? emitEnabled = null)
         {
             _logger.LogDebug("CreateContinousProjectionAsync: {ProjectionName}", name);
 
@@ -142,7 +138,7 @@ namespace SoftwarePioniere.EventStore
                 return;
             }
 
-            var manager = CreateProjectionsManager();
+            var manager = _provider.CreateProjectionsManager();
 
             var list = await manager.ListContinuousAsync(_provider.AdminCredentials).ConfigureAwait(false);
 
@@ -151,7 +147,7 @@ namespace SoftwarePioniere.EventStore
             {
                 _logger.LogDebug("Projection Query different Found: {ProjectionName}. Try Disable and Update", name);
                 await manager.DisableAsync(name, _provider.AdminCredentials).ConfigureAwait(false);
-                await manager.UpdateQueryAsync(name, query, _provider.AdminCredentials);
+                await manager.UpdateQueryAsync(name, query, emitEnabled, _provider.AdminCredentials);
                 await manager.EnableAsync(name, _provider.AdminCredentials);
                 await Task.Delay(1000).ConfigureAwait(false);
             }
@@ -159,29 +155,20 @@ namespace SoftwarePioniere.EventStore
             {
                 _logger.LogDebug("Projection Not Found: {ProjectionName}. Try Create", name);
                 await manager.CreateContinuousAsync(name, query, _provider.AdminCredentials).ConfigureAwait(false);
+                if (emitEnabled.GetValueOrDefault())
+                {
+                    await manager.UpdateQueryAsync(name, query, emitEnabled, _provider.AdminCredentials);
+                }
                 await manager.EnableAsync(name, _provider.AdminCredentials);
                 await Task.Delay(1000).ConfigureAwait(false);
             }
-
 
             exists = await CheckContinousProjectionIsCreatedAsync(name, query).ConfigureAwait(false);
 
             _logger.LogDebug("Projection: {ProjectionName}. Created. {exists}", name, exists);
         }
 
-        private ProjectionsManager CreateProjectionsManager()
-        {
-            var manager = new ProjectionsManager(new EventStoreLogger(_logger), _provider.GetHttpIpEndpoint(),
-                TimeSpan.FromSeconds(5));
-            return manager;
-        }
-
-        private UsersManager CreateUsersManager()
-        {
-            var manager = new UsersManager(new EventStoreLogger(_logger), _provider.GetHttpIpEndpoint(),
-                TimeSpan.FromSeconds(5));
-            return manager;
-        }
+       
 
 
         public async Task DisableProjectionAsync(string name)
@@ -197,7 +184,7 @@ namespace SoftwarePioniere.EventStore
             }
             else
             {
-                _logger.LogDebug("Projection {ProjectionName} is not Running", name);                
+                _logger.LogDebug("Projection {ProjectionName} is not Running", name);
             }
 
         }

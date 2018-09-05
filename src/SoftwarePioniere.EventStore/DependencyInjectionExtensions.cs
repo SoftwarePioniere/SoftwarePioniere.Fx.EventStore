@@ -27,7 +27,7 @@ namespace SoftwarePioniere.Extensions.DependencyInjection
 
             services
                 .AddSingleton<EventStoreConnectionProvider>()
-                .AddTransient<EventStoreSetup>()
+                .AddTransient<EventStoreSetup>()                
                 .AddTransient<IHostedService, EventStoreInitializerBackgroundService>()
                 .AddSingleton<IEventStoreInitializer, EventStoreSecurityInitializer>()
                 ;

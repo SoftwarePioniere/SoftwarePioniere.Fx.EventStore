@@ -4,7 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.Projections;
 using EventStore.ClientAPI.SystemData;
+using EventStore.ClientAPI.UserManagement;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -21,6 +23,20 @@ namespace SoftwarePioniere.EventStore
     {
         private readonly ILogger _logger;
 
+        public ProjectionsManager CreateProjectionsManager()
+        {
+            var manager = new ProjectionsManager(new EventStoreLogger(_logger), GetHttpIpEndpoint(),
+                TimeSpan.FromSeconds(5));
+            return manager;
+        }
+
+        public UsersManager CreateUsersManager()
+        {
+            var manager = new UsersManager(new EventStoreLogger(_logger), GetHttpIpEndpoint(),
+                TimeSpan.FromSeconds(5));
+            return manager;
+        }
+
 
         public EventStoreConnectionProvider(ILoggerFactory loggerFactory, IOptions<EventStoreOptions> ioptions)
         {
@@ -32,7 +48,7 @@ namespace SoftwarePioniere.EventStore
 
             _logger = loggerFactory.CreateLogger(GetType());
             Options = options ?? throw new ArgumentNullException(nameof(options));
-            
+
             OpsCredentials = new UserCredentials(options.OpsUsername, options.OpsPassword);
             AdminCredentials = new UserCredentials(options.AdminUsername, options.AdminPassword);
 
