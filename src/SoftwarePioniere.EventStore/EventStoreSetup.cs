@@ -16,10 +16,13 @@ namespace SoftwarePioniere.EventStore
 
         public EventStoreSetup(EventStoreConnectionProvider provider, ILoggerFactory loggerFactory)
         {
-            if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
+            if (loggerFactory == null)
+            {
+                throw new ArgumentNullException(nameof(loggerFactory));
+            }
+
             _logger = loggerFactory.CreateLogger(GetType());
             _provider = provider ?? throw new ArgumentNullException(nameof(provider));
-
         }
 
         public async Task AddOpsUserToAdminsAsync()
@@ -39,10 +42,13 @@ namespace SoftwarePioniere.EventStore
             {
                 var groups = new List<string>();
                 if (ops.Groups != null)
+                {
                     groups.AddRange(ops.Groups);
+                }
 
                 groups.Add("$admins");
-                await manager.UpdateUserAsync("ops", ops.FullName, groups.ToArray(), _provider.AdminCredentials).ConfigureAwait(false);
+                await manager.UpdateUserAsync("ops", ops.FullName, groups.ToArray(), _provider.AdminCredentials)
+                    .ConfigureAwait(false);
 
                 _logger.LogDebug("Group $admin added to ops user");
             }
@@ -74,7 +80,9 @@ namespace SoftwarePioniere.EventStore
                 var existingQuery = await manager.GetQueryAsync(name, _provider.AdminCredentials).ConfigureAwait(false);
 
                 if (EqualsCleanStrings(existingQuery, query))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -84,7 +92,8 @@ namespace SoftwarePioniere.EventStore
         {
             _logger.LogDebug("CheckOpsUserIsInAdminGroupAsync");
 
-            var manager = new UsersManager(new EventStoreLogger(_logger), _provider.GetHttpIpEndpoint(),
+            var manager = new UsersManager(new EventStoreLogger(_logger),
+                _provider.GetHttpIpEndpoint(),
                 TimeSpan.FromSeconds(5));
 
             var ops = await manager.GetUserAsync("ops", _provider.AdminCredentials).ConfigureAwait(false);
@@ -109,23 +118,20 @@ namespace SoftwarePioniere.EventStore
 
             var proj = list.FirstOrDefault(x => x.Name == name);
             if (proj == null)
+            {
                 throw new InvalidOperationException($"Projection {name} not found. Please create it");
+            }
 
             if (proj.Status.Equals("Running", StringComparison.OrdinalIgnoreCase))
             {
                 _logger.LogDebug("Projection {ProjectionName} Running", name);
                 return true;
             }
+
             _logger.LogDebug("Projection {ProjectionName} Not Running {Status}", name, proj.Status);
             return false;
         }
 
-        private static string CleanString(string dirty)
-        {
-            var clean = dirty.Replace(" ", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
-            return clean;
-        }
-        
         public async Task CreateContinousProjectionAsync(string name, string query, bool? emitEnabled = null)
         {
             _logger.LogDebug("CreateContinousProjectionAsync: {ProjectionName}", name);
@@ -154,11 +160,7 @@ namespace SoftwarePioniere.EventStore
             else
             {
                 _logger.LogDebug("Projection Not Found: {ProjectionName}. Try Create", name);
-                await manager.CreateContinuousAsync(name, query, _provider.AdminCredentials).ConfigureAwait(false);
-                if (emitEnabled.GetValueOrDefault())
-                {
-                    await manager.UpdateQueryAsync(name, query, emitEnabled, _provider.AdminCredentials);
-                }
+                await manager.CreateContinuousAsync(name, query, emitEnabled.GetValueOrDefault(), _provider.AdminCredentials).ConfigureAwait(false);               
                 await manager.EnableAsync(name, _provider.AdminCredentials);
                 await Task.Delay(1000).ConfigureAwait(false);
             }
@@ -168,15 +170,14 @@ namespace SoftwarePioniere.EventStore
             _logger.LogDebug("Projection: {ProjectionName}. Created. {exists}", name, exists);
         }
 
-       
-
 
         public async Task DisableProjectionAsync(string name)
         {
             var isRunning = await CheckProjectionIsRunningAsync(name).ConfigureAwait(false);
             if (isRunning)
             {
-                var manager = new ProjectionsManager(new EventStoreLogger(_logger), _provider.GetHttpIpEndpoint(),
+                var manager = new ProjectionsManager(new EventStoreLogger(_logger),
+                    _provider.GetHttpIpEndpoint(),
                     TimeSpan.FromSeconds(5));
 
                 _logger.LogDebug("Projection running: {ProjectionName}. Try Disabling", name);
@@ -186,7 +187,6 @@ namespace SoftwarePioniere.EventStore
             {
                 _logger.LogDebug("Projection {ProjectionName} is not Running", name);
             }
-
         }
 
         /// <summary>
@@ -204,7 +204,8 @@ namespace SoftwarePioniere.EventStore
                 return;
             }
 
-            var manager = new ProjectionsManager(new EventStoreLogger(_logger), _provider.GetHttpIpEndpoint(),
+            var manager = new ProjectionsManager(new EventStoreLogger(_logger),
+                _provider.GetHttpIpEndpoint(),
                 TimeSpan.FromSeconds(5));
 
             _logger.LogDebug("Projection Not running: {ProjectionName}. Try Enabling", name);
@@ -222,6 +223,12 @@ namespace SoftwarePioniere.EventStore
 
             isRunning = await CheckProjectionIsRunningAsync(name).ConfigureAwait(false);
             _logger.LogDebug("Projection {ProjectionName} running : {running}", name, isRunning);
+        }
+
+        private static string CleanString(string dirty)
+        {
+            var clean = dirty.Replace(" ", string.Empty).Replace("\n", string.Empty).Replace("\r", string.Empty);
+            return clean;
         }
 
         private static bool EqualsCleanStrings(string value1, string value2)
