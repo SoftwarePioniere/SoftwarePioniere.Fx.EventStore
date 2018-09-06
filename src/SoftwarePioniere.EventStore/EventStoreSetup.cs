@@ -78,7 +78,6 @@ namespace SoftwarePioniere.EventStore
             {
                 _logger.LogDebug("Projection found, compare");
                 var existingQuery = await manager.GetQueryAsync(name, _provider.AdminCredentials).ConfigureAwait(false);
-
                 if (EqualsCleanStrings(existingQuery, query))
                 {
                     return true;
@@ -132,7 +131,7 @@ namespace SoftwarePioniere.EventStore
             return false;
         }
 
-        public async Task CreateContinousProjectionAsync(string name, string query, bool? emitEnabled = null)
+        public async Task CreateContinousProjectionAsync(string name, string query, bool trackEmittedStreams = false, bool? emitEnabled = false)
         {
             _logger.LogDebug("CreateContinousProjectionAsync: {ProjectionName}", name);
 
@@ -160,7 +159,8 @@ namespace SoftwarePioniere.EventStore
             else
             {
                 _logger.LogDebug("Projection Not Found: {ProjectionName}. Try Create", name);
-                await manager.CreateContinuousAsync(name, query, emitEnabled.GetValueOrDefault(), _provider.AdminCredentials).ConfigureAwait(false);               
+                await manager.CreateContinuousAsync(name, query, trackEmittedStreams, _provider.AdminCredentials).ConfigureAwait(false);
+                await manager.UpdateQueryAsync(name, query, emitEnabled, _provider.AdminCredentials);
                 await manager.EnableAsync(name, _provider.AdminCredentials);
                 await Task.Delay(1000).ConfigureAwait(false);
             }
