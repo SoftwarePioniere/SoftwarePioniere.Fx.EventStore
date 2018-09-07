@@ -33,11 +33,11 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             _entityStore = entityStore ?? throw new ArgumentNullException(nameof(entityStore));
             _projector = projector ?? throw new ArgumentNullException(nameof(projector));
 
-            Queue = new InMemoryQueue<ProjectionEventData>(new InMemoryQueueOptions<ProjectionEventData>()
-            {
-                LoggerFactory = loggerFactory
-            });
-            Queue.StartWorkingAsync(HandleAsync);
+            //Queue = new InMemoryQueue<ProjectionEventData>(new InMemoryQueueOptions<ProjectionEventData>()
+            //{
+            //    LoggerFactory = loggerFactory
+            //});
+            //Queue.StartWorkingAsync(HandleAsync);
         }
 
         internal async Task HandleEventAsync(ProjectionEventData entry)
@@ -59,21 +59,21 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             }
         }
 
-        private async Task HandleAsync(IQueueEntry<ProjectionEventData> entry)
-        {
-            _logger.LogDebug("Handled Item {EventNumber}", entry.Value.EventNumber);
+        //private async Task HandleAsync(IQueueEntry<ProjectionEventData> entry)
+        //{
+        //    _logger.LogDebug("Handled Item {EventNumber}", entry.Value.EventNumber);
 
-            try
-            {
-                await HandleEventAsync(entry.Value);
-                entry.MarkCompleted();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error while Processing Event {EventNumber} from {Stream} {ProjectorId}", entry.Value.EventNumber, StreamName, ProjectorId);
-                throw;
-            }
-        }
+        //    try
+        //    {
+        //        await HandleEventAsync(entry.Value);
+        //        entry.MarkCompleted();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        _logger.LogError(e, "Error while Processing Event {EventNumber} from {Stream} {ProjectorId}", entry.Value.EventNumber, StreamName, ProjectorId);
+        //        throw;
+        //    }
+        //}
 
 
         public IEntityStore EntityStore
@@ -87,7 +87,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             }
         }
 
-        public IQueue<ProjectionEventData> Queue { get; }
+        //public IQueue<ProjectionEventData> Queue { get; }
         public ProjectionStatus Status { get; set; }
         public long CurrentCheckPoint { get; private set; }
         public bool IsLiveProcessing { get; private set; }
@@ -146,8 +146,9 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 EventData = de,
                 EventNumber = evt.OriginalEventNumber
             };
-            _logger.LogTrace("Enqueue Event @{0}", desc);
-            await Queue.EnqueueAsync(desc);
+            //_logger.LogTrace("Enqueue Event @{0}", desc);
+            // await Queue.EnqueueAsync(desc);
+            await HandleEventAsync(desc);
         }
 
         public async Task StartInitializationModeAsync()
