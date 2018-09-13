@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using Foundatio.Caching;
-using Foundatio.Queues;
 using Microsoft.Extensions.Logging;
 using SoftwarePioniere.EventStore;
 using SoftwarePioniere.ReadModel;

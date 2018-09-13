@@ -32,11 +32,11 @@ namespace SoftwarePioniere.EventStore
                 LogLevel = logLevel,
                 EventId = eventId,
                 State = state,
-                Exception = exception,
-                Message = formatter(state, exception),
+                Exception = exception,              
                 CategoryName = _categoryName,
                 Scopes = scopes
             };
+            
 
             switch (state)
             {
