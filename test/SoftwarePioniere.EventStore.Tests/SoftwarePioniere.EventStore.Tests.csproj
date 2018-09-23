@@ -8,10 +8,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
-    <PackageReference Include="SoftwarePioniere.DomainModel.TestHarness" Version="0.2.25" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(UseLocalSources)' != 'true' ">
+    <PackageReference Include="SoftwarePioniere.DomainModel.TestHarness" Version="0.2.26" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(UseLocalSources)' == 'true' ">
+    <ProjectReference Include="..\..\..\SoftwarePioniere.Fx\src\SoftwarePioniere.DomainModel.TestHarness\SoftwarePioniere.DomainModel.TestHarness.csproj" />
   </ItemGroup>
 
   <ItemGroup>

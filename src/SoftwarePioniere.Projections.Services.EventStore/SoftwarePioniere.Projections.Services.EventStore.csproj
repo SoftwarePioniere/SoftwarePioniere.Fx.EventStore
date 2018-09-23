@@ -5,9 +5,15 @@
     <Description>Software Pioniere Fx Event Store Projection Services</Description>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="SoftwarePioniere.Projections.Abstractions" Version="0.2.25" />
-    <PackageReference Include="SoftwarePioniere.ReadModel.Services" Version="0.2.25" />
+
+  <ItemGroup Condition=" '$(UseLocalSources)' != 'true' ">
+    <PackageReference Include="SoftwarePioniere.Projections.Abstractions" Version="0.2.26" />
+    <PackageReference Include="SoftwarePioniere.ReadModel.Services" Version="0.2.26" />
+  </ItemGroup>
+
+   <ItemGroup Condition=" '$(UseLocalSources)' == 'true' ">
+    <ProjectReference Include="..\..\..\SoftwarePioniere.Fx\src\SoftwarePioniere.Projections.Abstractions\SoftwarePioniere.Projections.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\SoftwarePioniere.Fx\src\SoftwarePioniere.ReadModel.Services\SoftwarePioniere.ReadModel.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

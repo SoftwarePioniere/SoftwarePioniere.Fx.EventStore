@@ -154,7 +154,12 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         {
             _logger.LogDebug("StartInitializationMode");
 
-            _initEntityStore = new InMemoryEntityStore(_loggerFactory, NullCacheClient.Instance, new InMemoryEntityStoreConnectionProvider());
+            _initEntityStore = new InMemoryEntityStore(new InMemoryEntityStoreOptions
+            {
+                CachingDisabled = true,
+                CacheClient = NullCacheClient.Instance,
+                LoggerFactory = _loggerFactory
+            }, new InMemoryEntityStoreConnectionProvider());
 
             InitializationMode = true;
             IsLiveProcessing = false;

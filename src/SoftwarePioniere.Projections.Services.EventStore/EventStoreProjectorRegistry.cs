@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,11 +21,14 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         private readonly IEntityStore _entityStore;
         private readonly ILogger _logger;
 
+        private readonly IDictionary<string, ProjectionInfo>
+            _infos = new ConcurrentDictionary<string, ProjectionInfo>();
+
         public EventStoreProjectorRegistry(ILoggerFactory loggerFactory
             , EventStoreConnectionProvider connectionProvider
             , IEnumerable<IReadModelProjector> projectors
             , IEntityStore entityStore
-            )
+        )
         {
 
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
@@ -33,6 +37,25 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             _logger = loggerFactory.CreateLogger(GetType());
             _projectors = projectors ?? throw new ArgumentNullException(nameof(projectors));
             _entityStore = entityStore ?? throw new ArgumentNullException(nameof(entityStore));
+
+            foreach (var projector in projectors)
+            {
+                if (projector != null)
+                {
+
+                    var id = projector.GetType().FullName;
+
+                    var i = new ProjectionInfo
+                    {
+                        ProjectorId = id,
+                        StreamName = projector.StreamName,
+                        Status = "None"
+                    };
+
+                    if (id != null) _infos.Add(id, i);
+                }
+            }
+
         }
 
 
@@ -83,7 +106,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         //}
 
 
-        private async Task<bool> ReadStreamAsync(string stream, EventStoreProjectionContext context, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task<bool> ReadStreamAsync(string stream, EventStoreProjectionContext context,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogDebug("ReadFromStreamAsync {Stream} {ProjectorId}", stream, context.ProjectorId);
 
@@ -129,7 +153,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError(e, "Error Reading Event: {Stream} {ProjectorId} {OriginalEventNumber}", stream, context.ProjectorId, ev.OriginalEventNumber);
+                        _logger.LogError(e, "Error Reading Event: {Stream} {ProjectorId} {OriginalEventNumber}", stream,
+                            context.ProjectorId, ev.OriginalEventNumber);
                     }
 
                 }
@@ -160,7 +185,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     name = $"{streamName.Replace("$ce-", string.Empty)}-empty";
 
                 _logger.LogDebug("InsertEmptyEvent: StreamName {StreamName}", name);
-                await _connectionProvider.Connection.Value.AppendToStreamAsync(name, -1, events, _connectionProvider.OpsCredentials).ConfigureAwait(false);
+                await _connectionProvider.Connection.Value
+                    .AppendToStreamAsync(name, -1, events, _connectionProvider.OpsCredentials).ConfigureAwait(false);
 
             }
             else
@@ -181,19 +207,26 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 await InsertEmptyDomainEventIfStreamIsEmpty(s);
             }
 
+
+
+
             foreach (var projector in _projectors)
             {
                 var projectorId = projector.GetType().FullName;
+
+                var info = _infos[projectorId ?? throw new InvalidOperationException()];
+                info.Status = "New";
 
                 _logger.LogInformation("Initialize Projector {ProjectorName}", projector.GetType().Name);
 
                 //await InsertEmptyDomainEventIfStreamIsEmpty(projector.StreamName);
 
-                var context = new EventStoreProjectionContext(_loggerFactory, _connectionProvider, _entityStore, projector)
-                {
-                    StreamName = projector.StreamName,
-                    ProjectorId = projectorId
-                };
+                var context =
+                    new EventStoreProjectionContext(_loggerFactory, _connectionProvider, _entityStore, projector)
+                    {
+                        StreamName = projector.StreamName,
+                        ProjectorId = projectorId
+                    };
 
                 projector.Context = context;
 
@@ -203,12 +236,16 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
                 if (status.IsNew)
                 {
+                    _logger.LogInformation("Starting Empty Initialization for Projector {Projector}",
+                        context.ProjectorId);
 
-                    _logger.LogInformation("Starting Empty Initialization for Projector {Projector}", context.ProjectorId);
-
+             
                     //start init mode
+                    info.Status = "StartingInitialization";
                     await context.StartInitializationModeAsync();
+
                     // await ReadStreamAsync(context.StreamName, context.Queue, cancellationToken);
+                    info.Status = "InitializationStartingStreamReading";
                     await ReadStreamAsync(context.StreamName, context, cancellationToken);
 
                     //QueueStats stats;
@@ -218,15 +255,22 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     //    stats = await context.Queue.GetQueueStatsAsync();
                     //} while (stats.Enqueued > stats.Dequeued);
 
+                    info.Status = "InitializationStartingCopy";
                     await projector.CopyEntitiesAsync(context.EntityStore, _entityStore, cancellationToken);
+
+             
                     await context.StopInitializationModeAsync();
+                    info.Status = "InitializationFinished";
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
                 _logger.LogDebug("Starting Subscription on EventStore for Projector {Projector}", context.ProjectorId);
                 context.StartSubscription(cancellationToken);
+                info.Status = "Startet";
             }
 
         }
+
+        public ProjectionInfo[] Infos => _infos.Values.ToArray();
     }
 }

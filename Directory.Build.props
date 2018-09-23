@@ -1,7 +1,12 @@
 <Project>
+  <PropertyGroup>
+    <ParentBuildProps>$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))</ParentBuildProps>
+  </PropertyGroup>
+
+  <Import Condition="Exists('$(ParentBuildProps)')" Project="$(ParentBuildProps)" />
 
   <PropertyGroup>
-   <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/obj/**/*</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/obj/**/*</DefaultItemExcludes>
     <DefaultItemExcludes>$(DefaultItemExcludes);$(MSBuildProjectDirectory)/bin/**/*</DefaultItemExcludes>
   </PropertyGroup>
 
@@ -21,34 +26,34 @@
   </PropertyGroup>
 
   <PropertyGroup>
-      <AspNetCoreVersion>2.1.0</AspNetCoreVersion>
-      <SoftwarePioniereFxVersion>0.2.2</SoftwarePioniereFxVersion>
+    <AspNetCoreVersion>2.1.0</AspNetCoreVersion>
+    <SoftwarePioniereFxVersion>0.2.2</SoftwarePioniereFxVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-      <MyVersion>99.99.99</MyVersion>
-      <IsPackable>True</IsPackable>
-      <Authors>SoftwarePioniere</Authors>
+    <MyVersion>99.99.99</MyVersion>
+    <IsPackable>True</IsPackable>
+    <Authors>SoftwarePioniere</Authors>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(NuGetVersionV2)' == '' ">
-      <Version>$(MyVersion)</Version>
-      <InformationalVersion>$(MyVersion)</InformationalVersion>
+    <Version>$(MyVersion)</Version>
+    <InformationalVersion>$(MyVersion)</InformationalVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(AssemblySemVer)' == '' ">
-      <AssemblyVersion>$(MyVersion)</AssemblyVersion>
-      <FileVersion>$(MyVersion)</FileVersion>
+    <AssemblyVersion>$(MyVersion)</AssemblyVersion>
+    <FileVersion>$(MyVersion)</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(NuGetVersionV2)' != '' ">
-        <Version>$(NuGetVersionV2)</Version>
-        <InformationalVersion>$(NuGetVersionV2)</InformationalVersion>
+    <Version>$(NuGetVersionV2)</Version>
+    <InformationalVersion>$(NuGetVersionV2)</InformationalVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(AssemblySemVer)' != '' ">
-        <AssemblyVersion>$(AssemblySemVer)</AssemblyVersion>
-        <FileVersion>$(AssemblySemVer)</FileVersion>
+    <AssemblyVersion>$(AssemblySemVer)</AssemblyVersion>
+    <FileVersion>$(AssemblySemVer)</FileVersion>
   </PropertyGroup>
 
 </Project>
