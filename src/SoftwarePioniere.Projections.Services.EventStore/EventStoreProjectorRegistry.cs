@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,9 +20,6 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         private readonly IEntityStore _entityStore;
         private readonly ILogger _logger;
 
-        private readonly IDictionary<string, ProjectionInfo>
-            _infos = new ConcurrentDictionary<string, ProjectionInfo>();
-
         public EventStoreProjectorRegistry(ILoggerFactory loggerFactory
             , EventStoreConnectionProvider connectionProvider
             , IEnumerable<IReadModelProjector> projectors
@@ -38,23 +34,6 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             _projectors = projectors ?? throw new ArgumentNullException(nameof(projectors));
             _entityStore = entityStore ?? throw new ArgumentNullException(nameof(entityStore));
 
-            foreach (var projector in projectors)
-            {
-                if (projector != null)
-                {
-
-                    var id = projector.GetType().FullName;
-
-                    var i = new ProjectionInfo
-                    {
-                        ProjectorId = id,
-                        StreamName = projector.StreamName,
-                        Status = "None"
-                    };
-
-                    if (id != null) _infos.Add(id, i);
-                }
-            }
 
         }
 
@@ -207,19 +186,38 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 await InsertEmptyDomainEventIfStreamIsEmpty(s);
             }
 
+            foreach (var projector in _projectors)
+            {
+                if (projector != null)
+                {
+                    var projectorId = projector.GetType().FullName;
+                    var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
 
+                    if (statusItem.IsNew)
+                    {
+                        var entity = statusItem.Entity;
+                        entity.ProjectorId = projectorId;
+                        entity.StreamName = projector.StreamName;
+                        entity.Status = ProjectionInitializationStatus.StatusNew;
+                        entity.ModifiedOnUtc = DateTime.UtcNow;
+                        await _entityStore.SaveAsync(statusItem, cancellationToken);
+                    }
+                }
+            }
 
 
             foreach (var projector in _projectors)
             {
                 var projectorId = projector.GetType().FullName;
 
-                var info = _infos[projectorId ?? throw new InvalidOperationException()];
-                info.Status = "New";
+                {
+                    var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
+                    statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                    statusItem.Entity.StatusText = "Starting";
+                    await _entityStore.SaveAsync(statusItem, cancellationToken);
+                }
 
                 _logger.LogInformation("Initialize Projector {ProjectorName}", projector.GetType().Name);
-
-                //await InsertEmptyDomainEventIfStreamIsEmpty(projector.StreamName);
 
                 var context =
                     new EventStoreProjectionContext(_loggerFactory, _connectionProvider, _entityStore, projector)
@@ -236,16 +234,26 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
                 if (status.IsNew)
                 {
-                    _logger.LogInformation("Starting Empty Initialization for Projector {Projector}",
-                        context.ProjectorId);
+                    _logger.LogInformation("Starting Empty Initialization for Projector {Projector}", context.ProjectorId);
 
-             
-                    //start init mode
-                    info.Status = "StartingInitialization";
+                    {
+                        var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
+                        statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                        statusItem.Entity.StatusText = "StartingInitialization";
+                        await _entityStore.SaveAsync(statusItem, cancellationToken);
+                    }
+
+                    //start init mode                 
                     await context.StartInitializationModeAsync();
 
                     // await ReadStreamAsync(context.StreamName, context.Queue, cancellationToken);
-                    info.Status = "InitializationStartingStreamReading";
+                    {
+                        var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
+                        statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                        statusItem.Entity.StatusText = "InitializationStartingStreamReading";
+                        await _entityStore.SaveAsync(statusItem, cancellationToken);
+                    }
+
                     await ReadStreamAsync(context.StreamName, context, cancellationToken);
 
                     //QueueStats stats;
@@ -255,22 +263,70 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     //    stats = await context.Queue.GetQueueStatsAsync();
                     //} while (stats.Enqueued > stats.Dequeued);
 
-                    info.Status = "InitializationStartingCopy";
+                    {
+                        var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
+                        statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                        statusItem.Entity.StatusText = "InitializationStartingCopy";
+                        await _entityStore.SaveAsync(statusItem, cancellationToken);
+                    }
+
                     await projector.CopyEntitiesAsync(context.EntityStore, _entityStore, cancellationToken);
 
-             
                     await context.StopInitializationModeAsync();
-                    info.Status = "InitializationFinished";
+
+                    {
+                        var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
+                        statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                        statusItem.Entity.StatusText = "InitializationFinished";
+                        await _entityStore.SaveAsync(statusItem, cancellationToken);
+                    }
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
                 _logger.LogDebug("Starting Subscription on EventStore for Projector {Projector}", context.ProjectorId);
                 context.StartSubscription(cancellationToken);
-                info.Status = "Startet";
+
+                {
+                    var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
+                    statusItem.Entity.Status = ProjectionInitializationStatus.StatusReady;
+                    statusItem.Entity.StatusText = "Startet";
+                    await _entityStore.SaveAsync(statusItem, cancellationToken);
+                }
+
             }
 
         }
 
-        public ProjectionInfo[] Infos => _infos.Values.ToArray();
+        public async Task<ProjectionRegistryStatus> GetStatusAsync()
+        {
+            _logger.LogDebug("GetStatusAsync");
+
+            var states = await _entityStore.LoadItemsAsync<ProjectionInitializationStatus>();
+
+            var temp = new ProjectionRegistryStatus()
+            {
+                Projectors = states
+            };
+
+            if (states.All(x => x.Status == ProjectionInitializationStatus.StatusReady))
+            {
+                temp.Status = ProjectionInitializationStatus.StatusReady;
+            }
+            else
+            {
+                if (states.Any(x => x.Status == ProjectionInitializationStatus.StatusPending))
+                {
+                    temp.Status = ProjectionInitializationStatus.StatusPending;
+                }
+                else
+                {
+                    temp.Status = ProjectionInitializationStatus.StatusNew;
+                }
+            }
+
+            return temp;
+        }
+
+
     }
 }
