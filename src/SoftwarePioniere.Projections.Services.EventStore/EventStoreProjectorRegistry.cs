@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using Foundatio.Caching;
 using Microsoft.Extensions.Logging;
 using SoftwarePioniere.EventStore;
 using SoftwarePioniere.Messaging;
@@ -18,12 +19,14 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         private readonly EventStoreConnectionProvider _connectionProvider;
         private readonly IEnumerable<IReadModelProjector> _projectors;
         private readonly IEntityStore _entityStore;
+        private readonly ICacheClient _cache;
         private readonly ILogger _logger;
 
         public EventStoreProjectorRegistry(ILoggerFactory loggerFactory
             , EventStoreConnectionProvider connectionProvider
             , IEnumerable<IReadModelProjector> projectors
             , IEntityStore entityStore
+            , ICacheClient cache
         )
         {
 
@@ -33,8 +36,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             _logger = loggerFactory.CreateLogger(GetType());
             _projectors = projectors ?? throw new ArgumentNullException(nameof(projectors));
             _entityStore = entityStore ?? throw new ArgumentNullException(nameof(entityStore));
-
-
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
 
@@ -191,6 +193,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 if (projector != null)
                 {
                     var projectorId = projector.GetType().FullName;
+                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
                     var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
 
                     if (statusItem.IsNew)
@@ -211,6 +214,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 var projectorId = projector.GetType().FullName;
 
                 {
+                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
                     var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
                     statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
                     statusItem.Entity.StatusText = "Starting";
@@ -228,7 +232,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
                 projector.Context = context;
 
-                //try load statuc
+                
+                await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionStatus>());
                 var status = await _entityStore.LoadAsync<ProjectionStatus>(projectorId, cancellationToken);
                 context.Status = status.Entity;
 
@@ -237,6 +242,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     _logger.LogInformation("Starting Empty Initialization for Projector {Projector}", context.ProjectorId);
 
                     {
+                        await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
                         var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
                         statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
                         statusItem.Entity.StatusText = "StartingInitialization";
@@ -248,6 +254,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
                     // await ReadStreamAsync(context.StreamName, context.Queue, cancellationToken);
                     {
+                        await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
                         var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
                         statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
                         statusItem.Entity.StatusText = "InitializationStartingStreamReading";
@@ -264,6 +271,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     //} while (stats.Enqueued > stats.Dequeued);
 
                     {
+                        await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
                         var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
                         statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
                         statusItem.Entity.StatusText = "InitializationStartingCopy";
@@ -275,6 +283,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     await context.StopInitializationModeAsync();
 
                     {
+                        await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
                         var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
                         statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
                         statusItem.Entity.StatusText = "InitializationFinished";
@@ -287,6 +296,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 context.StartSubscription(cancellationToken);
 
                 {
+                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
                     var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
                     statusItem.Entity.Status = ProjectionInitializationStatus.StatusReady;
                     statusItem.Entity.StatusText = "Startet";
