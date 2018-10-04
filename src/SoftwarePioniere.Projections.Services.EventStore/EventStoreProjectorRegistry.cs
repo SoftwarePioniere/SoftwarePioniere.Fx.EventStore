@@ -305,8 +305,14 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             var temp = new ProjectionRegistryStatus()
             {
-                Projectors = states
+                Projectors = states,
+                Status = ProjectionInitializationStatus.StatusNew
             };
+
+            if (states.Length == 0)
+            {
+                return temp;
+            }
 
             if (states.All(x => x.Status == ProjectionInitializationStatus.StatusReady))
             {
