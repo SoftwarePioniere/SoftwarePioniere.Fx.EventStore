@@ -340,6 +340,10 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 }
             }
 
+            temp.Pending = temp.Projectors.Count(x => x.Status == ProjectionInitializationStatus.StatusPending);
+            temp.Ready = temp.Projectors.Count(x => x.Status == ProjectionInitializationStatus.StatusReady);
+            temp.Total = temp.Projectors.Length;
+
             return temp;
         }
 
