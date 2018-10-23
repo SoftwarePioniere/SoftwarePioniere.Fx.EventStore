@@ -87,7 +87,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         //}
 
 
-        private async Task<bool> ReadStreamAsync(string stream, EventStoreProjectionContext context,
+        private async Task<ProjectionStatus> ReadStreamAsync(string stream, EventStoreProjectionContext context,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogDebug("ReadFromStreamAsync {Stream} {ProjectorId}", stream, context.ProjectorId);
@@ -114,7 +114,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     if (cancellationToken.IsCancellationRequested)
                     {
                         _logger.LogWarning("Initialization Cancelled");
-                        return false;
+                        return null;
                     }
 
                     try
@@ -142,7 +142,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             } while (!slice.IsEndOfStream);
 
-            return true;
+            return context.Status;
+
         }
 
 
@@ -233,7 +234,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
                 projector.Context = context;
 
-                
+
                 await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionStatus>());
                 var status = await _entityStore.LoadAsync<ProjectionStatus>(projectorId, cancellationToken);
                 context.Status = status.Entity;
@@ -262,7 +263,13 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                         await _entityStore.SaveAsync(statusItem, cancellationToken);
                     }
 
-                    await ReadStreamAsync(context.StreamName, context, cancellationToken);
+                    var tempStatus = await ReadStreamAsync(context.StreamName, context, cancellationToken);
+                    if (tempStatus != null)
+                    {
+                        status.Entity.LastCheckPoint = tempStatus.LastCheckPoint;
+                        status.Entity.ModifiedOnUtc = tempStatus.ModifiedOnUtc;
+                        await _entityStore.SaveAsync(status, cancellationToken);
+                    }
 
                     //QueueStats stats;
                     //do
@@ -280,6 +287,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     }
 
                     await projector.CopyEntitiesAsync(context.EntityStore, _entityStore, cancellationToken);
+
+           
 
                     await context.StopInitializationModeAsync();
 
