@@ -212,6 +212,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             foreach (var projector in _projectors)
             {
                 var projectorId = projector.GetType().FullName;
+                projector.Initialize(cancellationToken);
 
                 {
                     await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
