@@ -180,7 +180,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _logger.LogDebug("InitializeAsync");
+            _logger.LogInformation("Starting InitializeAsync");
 
             var streamsToCheck = _projectors.Select(x => x.StreamName).Distinct().ToArray();
             foreach (var s in streamsToCheck)
@@ -264,11 +264,11 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     }
 
                     var tempStatus = await ReadStreamAsync(context.StreamName, context, cancellationToken);
+
                     if (tempStatus != null)
                     {
                         status.Entity.LastCheckPoint = tempStatus.LastCheckPoint;
                         status.Entity.ModifiedOnUtc = tempStatus.ModifiedOnUtc;
-                        await _entityStore.SaveAsync(status, cancellationToken);
                     }
 
                     //QueueStats stats;
@@ -288,9 +288,9 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
                     await projector.CopyEntitiesAsync(context.EntityStore, _entityStore, cancellationToken);
 
-           
-
                     await context.StopInitializationModeAsync();
+
+                    await _entityStore.SaveAsync(status, cancellationToken);
 
                     {
                         await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
@@ -314,7 +314,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 }
 
             }
-
+            _logger.LogInformation("Finished InitializeAsync");
         }
 
         public async Task<ProjectionRegistryStatus> GetStatusAsync()
