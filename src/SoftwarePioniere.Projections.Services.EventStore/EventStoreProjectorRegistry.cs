@@ -182,6 +182,13 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         {
             _logger.LogInformation("Starting InitializeAsync");
 
+            foreach (var projector in _projectors)
+            {
+                if (!string.IsNullOrEmpty(projector.StreamName))
+                {
+                    throw new InvalidOperationException($"Empty Stream in Projector: {projector.GetType().FullName}");
+                }
+            }
             var streamsToCheck = _projectors.Select(x => x.StreamName).Distinct().ToArray();
             foreach (var s in streamsToCheck)
             {
@@ -223,7 +230,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     await _entityStore.SaveAsync(statusItem, cancellationToken);
                 }
 
-                _logger.LogInformation("Initialize Projector {ProjectorName}", projector.GetType().Name);
+                _logger.LogInformation("Initialize Projector {ProjectorName}", projectorId);
 
                 var context =
                     new EventStoreProjectionContext(_loggerFactory, _connectionProvider, _entityStore, projector)
@@ -241,7 +248,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
                 if (status.IsNew)
                 {
-                    _logger.LogInformation("Starting Empty Initialization for Projector {Projector}", context.ProjectorId);
+                    _logger.LogDebug("Starting Empty Initialization for Projector {Projector}", projectorId);
 
                     {
                         await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
@@ -251,7 +258,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                         await _entityStore.SaveAsync(statusItem, cancellationToken);
                     }
 
-                    //start init mode                 
+                    //start init mode
                     await context.StartInitializationModeAsync();
 
                     // await ReadStreamAsync(context.StreamName, context.Queue, cancellationToken);
