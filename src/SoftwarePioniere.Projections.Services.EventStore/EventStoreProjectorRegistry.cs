@@ -184,7 +184,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             foreach (var projector in _projectors)
             {
-                if (!string.IsNullOrEmpty(projector.StreamName))
+                if (string.IsNullOrEmpty(projector.StreamName))
                 {
                     throw new InvalidOperationException($"Empty Stream in Projector: {projector.GetType().FullName}");
                 }
