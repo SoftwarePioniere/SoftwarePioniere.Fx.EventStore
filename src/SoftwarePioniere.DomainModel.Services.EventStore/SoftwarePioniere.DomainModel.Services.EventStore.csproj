@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(UseLocalSources)' != 'true' ">
-    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.2.38" />
+    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(UseLocalSources)' == 'true' ">
