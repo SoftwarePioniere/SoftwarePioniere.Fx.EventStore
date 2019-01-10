@@ -95,11 +95,21 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         public bool InitializationMode { get; private set; }
 
-        private EventStoreStreamCatchUpSubscription _sub;
+        // private EventStoreStreamCatchUpSubscription _sub;
+
+
+        private CancellationToken _cancellationToken;
 
         public void StartSubscription(CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogDebug("StartSubscription for Projector {ProjectorId} on {Stream}", ProjectorId, StreamName);
+            _cancellationToken = cancellationToken;
+            StartSubscriptionInternal();
+        }
+
+        private void StartSubscriptionInternal()
+        {
+            _logger.LogDebug("StartSubscriptionInternal for Projector {ProjectorId} on {Stream}", ProjectorId, StreamName);
 
             var cred = _connectionProvider.OpsCredentials;
             var src = _connectionProvider.Connection.Value;
@@ -110,7 +120,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 lastCheckpoint = Status.LastCheckPoint;
             }
 
-            _sub = src.SubscribeToStreamFrom(StreamName
+            var sub = src.SubscribeToStreamFrom(StreamName
                 , lastCheckpoint
                 , CatchUpSubscriptionSettings.Default
                 , EventAppeared
@@ -118,8 +128,10 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 , SubscriptionDropped
                 , cred);
 
-            cancellationToken.Register(_sub.Stop);
+            _cancellationToken.Register(sub.Stop);
         }
+
+
 
         private void SubscriptionDropped(EventStoreCatchUpSubscription sub, SubscriptionDropReason reason, Exception ex)
         {
@@ -127,6 +139,10 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 sub.StreamId,
                 ProjectorId,
                 reason.ToString());
+            sub.Stop();
+
+            _logger.LogInformation("Re Subscribe Subscription");
+            StartSubscriptionInternal();
         }
 
         private void LiveProcessingStarted(EventStoreCatchUpSubscription sub)
