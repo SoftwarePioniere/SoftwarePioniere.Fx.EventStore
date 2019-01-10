@@ -11,7 +11,7 @@ namespace SoftwarePioniere.EventStore
     public class EventStoreInitializerBackgroundService : BackgroundService
     {
         private readonly IEnumerable<IEventStoreInitializer> _eventStoreInitializers;
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public EventStoreInitializerBackgroundService(ILoggerFactory loggerFactory, IEnumerable<IEventStoreInitializer> eventStoreInitializers)
         {
@@ -46,6 +46,8 @@ namespace SoftwarePioniere.EventStore
                     _logger.LogDebug("IEventStoreInitializer {EventStoreInitializer} already processed", initializer.GetType().Name);
                 }
             }
+
+            _logger.LogInformation("EventStore Initializer Finished");
         }
     }
 }

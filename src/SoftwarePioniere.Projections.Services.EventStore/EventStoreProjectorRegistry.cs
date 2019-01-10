@@ -321,7 +321,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 }
 
             }
-            _logger.LogInformation("Finished InitializeAsync");
+            _logger.LogInformation("EventStore Projection Initializer Finished ");
         }
 
         public async Task<ProjectionRegistryStatus> GetStatusAsync()
