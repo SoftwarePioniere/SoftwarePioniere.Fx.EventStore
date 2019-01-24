@@ -27,11 +27,11 @@ namespace SoftwarePioniere.EventStore
 
         public async Task AddOpsUserToAdminsAsync()
         {
-            _logger.LogDebug("AddOpsUserToAdminsAsync");
+            _logger.LogTrace("AddOpsUserToAdminsAsync");
 
             if (await CheckOpsUserIsInAdminGroupAsync().ConfigureAwait(false))
             {
-                _logger.LogDebug("ops user is already admin");
+                _logger.LogTrace("ops user is already admin");
                 return;
             }
 
@@ -50,7 +50,7 @@ namespace SoftwarePioniere.EventStore
                 await manager.UpdateUserAsync("ops", ops.FullName, groups.ToArray(), _provider.AdminCredentials)
                     .ConfigureAwait(false);
 
-                _logger.LogDebug("Group $admin added to ops user");
+                _logger.LogTrace("Group $admin added to ops user");
             }
         }
 
@@ -67,7 +67,7 @@ namespace SoftwarePioniere.EventStore
 
         public async Task<bool> CheckContinousProjectionIsCreatedAsync(string name, string query)
         {
-            _logger.LogDebug("CheckContinousProjectionAsync: {ProjectionName}", name);
+            _logger.LogTrace("CheckContinousProjectionAsync: {ProjectionName}", name);
 
             var manager = _provider.CreateProjectionsManager();
 
@@ -76,7 +76,7 @@ namespace SoftwarePioniere.EventStore
 
             if (proj != null)
             {
-                _logger.LogDebug("Projection found, compare");
+                _logger.LogTrace("Projection found, compare");
                 var existingQuery = await manager.GetQueryAsync(name, _provider.AdminCredentials).ConfigureAwait(false);
                 if (EqualsCleanStrings(existingQuery, query))
                 {
@@ -89,7 +89,7 @@ namespace SoftwarePioniere.EventStore
 
         public async Task<bool> CheckOpsUserIsInAdminGroupAsync()
         {
-            _logger.LogDebug("CheckOpsUserIsInAdminGroupAsync");
+            _logger.LogTrace("CheckOpsUserIsInAdminGroupAsync");
 
             var manager = new UsersManager(new EventStoreLogger(_logger),
                 _provider.GetHttpIpEndpoint(),
@@ -99,17 +99,17 @@ namespace SoftwarePioniere.EventStore
 
             if (ops.Groups == null || ops.Groups != null && !ops.Groups.Contains("$admins"))
             {
-                _logger.LogDebug("Ops User not in admins");
+                _logger.LogTrace("Ops User not in admins");
                 return false;
             }
 
-            _logger.LogDebug("Ops User in admins");
+            _logger.LogTrace("Ops User in admins");
             return true;
         }
 
         public async Task<bool> CheckProjectionIsRunningAsync(string name)
         {
-            _logger.LogDebug("CheckProjectionIsRunningAsync: {ProjectionName}", name);
+            _logger.LogTrace("CheckProjectionIsRunningAsync: {ProjectionName}", name);
 
             var manager = _provider.CreateProjectionsManager();
 
@@ -123,7 +123,7 @@ namespace SoftwarePioniere.EventStore
 
             if (proj.Status.Equals("Running", StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogDebug("Projection {ProjectionName} Running", name);
+                _logger.LogTrace("Projection {ProjectionName} Running", name);
                 return true;
             }
 
@@ -133,13 +133,13 @@ namespace SoftwarePioniere.EventStore
 
         public async Task CreateContinousProjectionAsync(string name, string query, bool trackEmittedStreams = false, bool? emitEnabled = false)
         {
-            _logger.LogDebug("CreateContinousProjectionAsync: {ProjectionName}", name);
+            _logger.LogTrace("CreateContinousProjectionAsync: {ProjectionName}", name);
 
             var exists = await CheckContinousProjectionIsCreatedAsync(name, query).ConfigureAwait(false);
 
             if (exists)
             {
-                _logger.LogDebug("ContinousProjection: {ProjectionName} already exist", name);
+                _logger.LogTrace("ContinousProjection: {ProjectionName} already exist", name);
                 return;
             }
 
@@ -180,7 +180,7 @@ namespace SoftwarePioniere.EventStore
                     _provider.GetHttpIpEndpoint(),
                     TimeSpan.FromSeconds(5));
 
-                _logger.LogDebug("Projection running: {ProjectionName}. Try Disabling", name);
+                _logger.LogTrace("Projection running: {ProjectionName}. Try Disabling", name);
                 await manager.DisableAsync(name, _provider.AdminCredentials).ConfigureAwait(false);
             }
             else
@@ -195,12 +195,12 @@ namespace SoftwarePioniere.EventStore
         /// <exception cref="InvalidOperationException"></exception>
         public async Task EnableProjectionAsync(string name)
         {
-            _logger.LogDebug("EnableProjectionAsync: {ProjectionName}", name);
+            _logger.LogTrace("EnableProjectionAsync: {ProjectionName}", name);
 
             var isRunning = await CheckProjectionIsRunningAsync(name).ConfigureAwait(false);
             if (isRunning)
             {
-                _logger.LogDebug("Projection {ProjectionName} already Running", name);
+                _logger.LogTrace("Projection {ProjectionName} already Running", name);
                 return;
             }
 
@@ -208,14 +208,14 @@ namespace SoftwarePioniere.EventStore
                 _provider.GetHttpIpEndpoint(),
                 TimeSpan.FromSeconds(5));
 
-            _logger.LogDebug("Projection Not running: {ProjectionName}. Try Enabling", name);
+            _logger.LogTrace("Projection Not running: {ProjectionName}. Try Enabling", name);
             await manager.EnableAsync(name, _provider.AdminCredentials).ConfigureAwait(false);
 
             isRunning = await CheckProjectionIsRunningAsync(name).ConfigureAwait(false);
             var i = 1;
             while (i < 10 && !isRunning)
             {
-                _logger.LogDebug("Waiting for Projection {ProjectionName} enabled.", name);
+                _logger.LogTrace("Waiting for Projection {ProjectionName} enabled.", name);
                 await Task.Delay(2000).ConfigureAwait(false);
                 i++;
                 isRunning = await CheckProjectionIsRunningAsync(name).ConfigureAwait(false);

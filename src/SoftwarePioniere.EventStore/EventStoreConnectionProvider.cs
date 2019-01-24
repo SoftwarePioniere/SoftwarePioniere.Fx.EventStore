@@ -54,7 +54,7 @@ namespace SoftwarePioniere.EventStore
 
             Connection = new Lazy<IEventStoreConnection>(() =>
             {
-                _logger.LogDebug("Creating Connection");
+                _logger.LogTrace("Creating Connection");
 
                 IEventStoreConnection con;
                 var connectionSettingsBuilder = ConnectionSettings.Create()
@@ -120,7 +120,7 @@ namespace SoftwarePioniere.EventStore
                     port = Options.ClusterHttpPorts[i];
                 }
 
-                _logger.LogInformation($"Creating Cluster IP Endpoint: {ipa}:{port}");
+                _logger.LogTrace($"Creating Cluster IP Endpoint: {ipa}:{port}");
                 return new IPEndPoint(ipa, port);
 
             });
@@ -198,20 +198,20 @@ namespace SoftwarePioniere.EventStore
 
         private IPAddress GetHostIp(string ipEndpoint)
         {
-            _logger.LogDebug("GetHostIp for IpEndPoint {IpEndPoint}", ipEndpoint);
+            _logger.LogTrace("GetHostIp for IpEndPoint {IpEndPoint}", ipEndpoint);
 
             if (_hostIpAddresses.ContainsKey(ipEndpoint))
                 return _hostIpAddresses[ipEndpoint];
 
             if (!IPAddress.TryParse(ipEndpoint, out var ipa))
             {
-                _logger.LogDebug("TryParse IP faulted, Try to lookup DNS");
+                _logger.LogTrace("TryParse IP faulted, Try to lookup DNS");
 
                 var hostIp = Dns.GetHostAddressesAsync(ipEndpoint).ConfigureAwait(false).GetAwaiter().GetResult();
-                _logger.LogDebug($"Loaded {hostIp.Length} Host Addresses");
+                _logger.LogTrace($"Loaded {hostIp.Length} Host Addresses");
                 foreach (var ipAddress in hostIp)
                 {
-                    _logger.LogDebug($"HostIp {ipAddress}");
+                    _logger.LogTrace($"HostIp {ipAddress}");
                 }
 
                 if (hostIp.Length > 0)
@@ -234,7 +234,7 @@ namespace SoftwarePioniere.EventStore
 
         public IPEndPoint GetHttpIpEndpoint()
         {
-            _logger.LogDebug("GetHttpIpEndpoint for IpEndPoint {IpEndPoint}", Options.IpEndPoint);
+            _logger.LogTrace("GetHttpIpEndpoint for IpEndPoint {IpEndPoint}", Options.IpEndPoint);
 
             if (_httpEndpoint != null)
                 return _httpEndpoint;
@@ -269,7 +269,7 @@ namespace SoftwarePioniere.EventStore
 
         public async Task<bool> IsStreamEmptyAsync(string streamName)
         {
-            _logger.LogDebug("IsStreamEmptyAsync {StreamName}", streamName);
+            _logger.LogTrace("IsStreamEmptyAsync {StreamName}", streamName);
 
             //EventReadResult firstEvent = null;
             //try
@@ -296,7 +296,7 @@ namespace SoftwarePioniere.EventStore
             var con = Connection.Value;
 
             var slice = await con.ReadStreamEventsForwardAsync(streamName, 0, 1, false, AdminCredentials).ConfigureAwait(false);
-            _logger.LogDebug("StreamExists {StreamName} : SliceStatus: {SliceStatus}", streamName, slice.Status);
+            _logger.LogTrace("StreamExists {StreamName} : SliceStatus: {SliceStatus}", streamName, slice.Status);
 
             if (slice.Status == SliceReadStatus.StreamNotFound)
             {
@@ -312,7 +312,7 @@ namespace SoftwarePioniere.EventStore
             //    ret = true;
             //}
 
-            _logger.LogInformation("IsStreamEmptyAsync {StreamName} {IsEmpty}", streamName, ret);
+            _logger.LogTrace("IsStreamEmptyAsync {StreamName} {IsEmpty}", streamName, ret);
 
             return ret;
 
