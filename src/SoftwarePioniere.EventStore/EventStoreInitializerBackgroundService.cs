@@ -26,7 +26,7 @@ namespace SoftwarePioniere.EventStore
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogDebug("ExecuteAsync");
+            _logger.LogInformation("Starting EventStoreInitializer");
 
             var done = new List<Type>();
 

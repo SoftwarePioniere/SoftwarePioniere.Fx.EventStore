@@ -19,7 +19,7 @@ namespace SoftwarePioniere.EventStore
 
         public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _logger.LogInformation("InitializeAsync");
+            _logger.LogTrace("InitializeAsync");
 
             if (!await _setup.CheckOpsUserIsInAdminGroupAsync())
             {
