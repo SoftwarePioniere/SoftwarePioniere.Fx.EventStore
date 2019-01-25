@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -91,6 +92,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogDebug("ReadFromStreamAsync {Stream} {ProjectorId}", stream, context.ProjectorId);
+            var sw = Stopwatch.StartNew();
 
             var cred = _connectionProvider.OpsCredentials;
             var src = _connectionProvider.Connection.Value;
@@ -98,7 +100,6 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             StreamEventsSlice slice;
 
             long sliceStart = StreamPosition.Start;
-
 
             do
             {
@@ -142,6 +143,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             } while (!slice.IsEndOfStream);
 
+            _logger.LogDebug("ReadFromStreamAsync {Stream} {ProjectorId} Finished in {Elapsed:0.0000} ms", stream, context.ProjectorId, sw.ElapsedMilliseconds);
+
             return context.Status;
 
         }
@@ -181,6 +184,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogInformation("Starting InitializeAsync");
+            var sw = Stopwatch.StartNew();
 
             foreach (var projector in _projectors)
             {
@@ -192,7 +196,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             var streamsToCheck = _projectors.Select(x => x.StreamName).Distinct().ToArray();
             foreach (var s in streamsToCheck)
             {
-                _logger.LogInformation("Preparing Stream {StreamName}", s);
+                _logger.LogDebug("Preparing Stream {StreamName}", s);
                 await InsertEmptyDomainEventIfStreamIsEmpty(s);
             }
 
@@ -321,12 +325,12 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 }
 
             }
-            _logger.LogInformation("EventStore Projection Initializer Finished ");
+            _logger.LogInformation("EventStore Projection Initializer Finished in {Elapsed:0.0000} ms", sw.ElapsedMilliseconds);
         }
 
         public async Task<ProjectionRegistryStatus> GetStatusAsync()
         {
-            _logger.LogDebug("GetStatusAsync");
+            _logger.LogTrace("GetStatusAsync");
 
             var states = await _entityStore.LoadItemsAsync<ProjectionInitializationStatus>();
 

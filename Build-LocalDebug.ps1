@@ -1,6 +1,7 @@
 $host.ui.RawUI.WindowTitle = 'build.. ' + (Get-Item -Path "." -Verbose).Name
 
-.\build.ps1 -Target BuildTestPackLocalPush -configuration Debug
+dotnet cake --target=BuildTestPackLocalPush --configuration=Debug
+#.\build.ps1 -Target BuildTestPackLocalPush -configuration Debug --verbosity=verbose
 
 if ($LASTEXITCODE -ne 0) {
     # Write-Error "Build Error..."

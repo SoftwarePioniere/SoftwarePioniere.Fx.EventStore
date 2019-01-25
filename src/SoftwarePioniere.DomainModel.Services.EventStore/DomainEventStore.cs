@@ -59,7 +59,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
             if (currentSlice.Status == SliceReadStatus.StreamNotFound)
             {
-                _logger.LogDebug("CheckAggregateExists {type} {AggregateId} {StreamName} not found", typeof(T), aggregateId, streamName);
+                _logger.LogTrace("CheckAggregateExists {type} {AggregateId} {StreamName} not found", typeof(T), aggregateId, streamName);
                 return false;
             }
 
@@ -124,7 +124,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
                     var result = await connection.Value
                         .AppendToStreamAsync(streamName, expectedVersion, eventsToSave, _provider.OpsCredentials)
                         .ConfigureAwait(false);
-                    _logger.LogDebug("EventStore - WriteResult: {@WriteResult}", result);
+                    _logger.LogTrace("EventStore - WriteResult: {@WriteResult}", result);
                 }
                 catch (WrongExpectedVersionException weException)
                 {

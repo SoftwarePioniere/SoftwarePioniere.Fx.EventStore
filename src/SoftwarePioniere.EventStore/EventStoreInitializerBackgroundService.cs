@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace SoftwarePioniere.EventStore
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Starting EventStoreInitializer");
-
+            var sw = Stopwatch.StartNew();
             var done = new List<Type>();
 
             foreach (var initializer in _eventStoreInitializers.OrderBy(x => x.ExecutionOrder))
@@ -47,7 +48,7 @@ namespace SoftwarePioniere.EventStore
                 }
             }
 
-            _logger.LogInformation("EventStore Initializer Finished");
+            _logger.LogInformation("EventStore Initializer Finished in {Elapsed:0.0000} ms", sw.ElapsedMilliseconds);
         }
     }
 }

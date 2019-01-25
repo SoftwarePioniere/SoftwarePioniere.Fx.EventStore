@@ -7,8 +7,8 @@
 
 
   <ItemGroup Condition=" '$(UseLocalSources)' != 'true' ">
-    <PackageReference Include="SoftwarePioniere.Projections.Abstractions" Version="0.4.0" />
-    <PackageReference Include="SoftwarePioniere.ReadModel.Services" Version="0.4.0" />
+    <PackageReference Include="SoftwarePioniere.Projections.Abstractions" Version="0.4.2" />
+    <PackageReference Include="SoftwarePioniere.ReadModel.Services" Version="0.4.2" />
   </ItemGroup>
 
    <ItemGroup Condition=" '$(UseLocalSources)' == 'true' ">

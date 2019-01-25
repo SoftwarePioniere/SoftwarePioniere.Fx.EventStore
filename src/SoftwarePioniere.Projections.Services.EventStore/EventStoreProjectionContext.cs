@@ -41,7 +41,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         internal async Task HandleEventAsync(ProjectionEventData entry)
         {
-            _logger.LogDebug("Handled Item {EventNumber} {StreamName} {ProjectorId}", entry.EventNumber, StreamName, ProjectorId);
+            _logger.LogTrace("Handled Item {EventNumber} {StreamName} {ProjectorId}", entry.EventNumber, StreamName, ProjectorId);
             CurrentCheckPoint = entry.EventNumber;
 
             try
@@ -102,7 +102,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         public void StartSubscription(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _logger.LogDebug("StartSubscription for Projector {ProjectorId} on {Stream}", ProjectorId, StreamName);
+            _logger.LogInformation("StartSubscription for Projector {ProjectorId} on {Stream}", ProjectorId, StreamName);
             _cancellationToken = cancellationToken;
             StartSubscriptionInternal();
         }
@@ -153,7 +153,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         private async Task EventAppeared(EventStoreCatchUpSubscription sub, ResolvedEvent evt)
         {
-            _logger.LogDebug("EventAppeared {SubscriptionName} {Stream} Projector {ProjectorId}", sub.SubscriptionName, sub.StreamId, ProjectorId);
+            _logger.LogTrace("EventAppeared {SubscriptionName} {Stream} Projector {ProjectorId}", sub.SubscriptionName, sub.StreamId, ProjectorId);
 
             var de = evt.Event.ToDomainEvent();
             var desc = new ProjectionEventData

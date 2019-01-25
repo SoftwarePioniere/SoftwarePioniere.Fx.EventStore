@@ -50,7 +50,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
                 json = await manager.GetPartitionStateAsync(name, partitionId, _provider.OpsCredentials);
             }
 
-            _logger.LogDebug("State {StateJson}", json);
+            _logger.LogTrace("State {StateJson}", json);
             return json;
         }
     }

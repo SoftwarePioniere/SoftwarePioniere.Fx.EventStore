@@ -69,7 +69,7 @@ namespace SoftwarePioniere.EventStore
 
                     if (Options.UseSslCertificate)
                     {
-                        _logger.LogInformation("GetEventStore: with SSL IP: {0}:{1} // User: {2}", options.IpEndPoint, options.ExtSecureTcpPort, options.OpsUsername);
+                        _logger.LogInformation("Connceting To GetEventStore: with SSL IP: {0}:{1} // User: {2}", options.IpEndPoint, options.ExtSecureTcpPort, options.OpsUsername);
 
                         var url = $"tcp://{ipa.MapToIPv4()}:{Options.ExtSecureTcpPort}";
                         connectionSettingsBuilder.UseSslConnection(Options.SslTargetHost, Options.SslValidateServer);
@@ -78,7 +78,7 @@ namespace SoftwarePioniere.EventStore
                     }
                     else
                     {
-                        _logger.LogInformation("GetEventStore: without SSL IP: {0}:{1} // User: {2}", options.IpEndPoint, options.TcpPort, options.OpsUsername);
+                        _logger.LogInformation("Connceting To GetEventStore: without SSL IP: {0}:{1} // User: {2}", options.IpEndPoint, options.TcpPort, options.OpsUsername);
 
                         var url = $"tcp://{ipa.MapToIPv4()}:{Options.TcpPort}";
                         var uri = new Uri(url);
@@ -96,7 +96,7 @@ namespace SoftwarePioniere.EventStore
                     }
 
 
-                    _logger.LogInformation("GetEventStore: for Cluster // User: {0}", options.OpsUsername);
+                    _logger.LogInformation("Connceting To GetEventStore: for Cluster // User: {0}", options.OpsUsername);
                     con = CreateForCluster(connectionSettingsBuilder);
                 }
 
@@ -155,7 +155,7 @@ namespace SoftwarePioniere.EventStore
         {
             con.Disconnected += (s, e) =>
             {
-                _logger.LogDebug("EventStore Disconnected: {ConnectionName}", e.Connection.ConnectionName);
+                _logger.LogInformation("EventStore Disconnected: {ConnectionName}", e.Connection.ConnectionName);
                 IsConnected = false;
                 OnConnectionChanged();
 
@@ -163,12 +163,12 @@ namespace SoftwarePioniere.EventStore
 
             con.Reconnecting += (s, e) =>
             {
-                _logger.LogDebug("EventStore Reconnecting: {ConnectionName}", e.Connection.ConnectionName);
+                _logger.LogInformation("EventStore Reconnecting: {ConnectionName}", e.Connection.ConnectionName);
             };
 
             con.Connected += (s, e) =>
             {
-                _logger.LogDebug("EventStore Connected: {ConnectionName}", e.Connection.ConnectionName);
+                _logger.LogInformation("EventStore Connected: {ConnectionName}", e.Connection.ConnectionName);
                 IsConnected = true;
 
 
