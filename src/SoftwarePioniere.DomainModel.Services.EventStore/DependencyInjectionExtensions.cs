@@ -10,7 +10,7 @@ namespace SoftwarePioniere.Extensions.DependencyInjection
         public static IServiceCollection AddEventStoreDomainServices(this IServiceCollection services)
         {
             services
-                .AddDomainServices()
+             //   .AddDomainServices()
                 .AddSingleton<IEventStore, DomainEventStore>()           
                 .AddSingleton<IProjectionReader, ProjectionReader>()
                 ;

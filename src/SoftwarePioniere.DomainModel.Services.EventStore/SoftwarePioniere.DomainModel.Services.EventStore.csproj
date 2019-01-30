@@ -5,16 +5,16 @@
     <Description>Software Pioniere Fx Event Store Domain Services</Description>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(UseLocalSources)' != 'true' ">
-    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.4.2" />
-  </ItemGroup>
-
   <ItemGroup Condition=" '$(UseLocalSources)' == 'true' ">
     <ProjectReference Include="..\..\..\SoftwarePioniere.Fx\src\SoftwarePioniere.DomainModel.Services\SoftwarePioniere.DomainModel.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SoftwarePioniere.EventStore\SoftwarePioniere.EventStore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.4.4" />
   </ItemGroup>
 
 
