@@ -141,8 +141,11 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 reason.ToString());
             sub.Stop();
 
-            _logger.LogInformation("Re Subscribe Subscription");
-            StartSubscriptionInternal();
+            if (!_cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("Re Subscribe Subscription");
+                StartSubscriptionInternal();
+            }
         }
 
         private void LiveProcessingStarted(EventStoreCatchUpSubscription sub)
