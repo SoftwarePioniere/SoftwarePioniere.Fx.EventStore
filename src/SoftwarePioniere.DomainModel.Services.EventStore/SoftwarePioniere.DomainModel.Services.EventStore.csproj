@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.4.16" />
+    <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.4.17" />
   </ItemGroup>
 
 
