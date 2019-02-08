@@ -203,12 +203,12 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
 
                 if (currentSlice.Status == SliceReadStatus.StreamNotFound)
                 {
-                    throw new AggregateNotFoundException { AggregateId = aggregateId, AggregateType = typeof(T) };
+                    throw new AggregateNotFoundException(aggregateId, typeof(T));
                 }
 
                 if (currentSlice.Status == SliceReadStatus.StreamDeleted)
                 {
-                    throw new AggregateDeletedException { AggregateId = aggregateId, AggregateType = typeof(T) };
+                    throw new AggregateNotFoundException(aggregateId, typeof(T));
                 }
 
                 sliceStart = currentSlice.NextEventNumber;
