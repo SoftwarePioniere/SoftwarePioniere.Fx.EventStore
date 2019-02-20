@@ -240,9 +240,9 @@ namespace SoftwarePioniere.EventStore
             var cred = _provider.AdminCredentials;
             var con = _provider.Connection.Value;
 
-            var list = await manager.List(stream, cred);
+            var list = await manager.List(cred);
 
-            if (list.All(x => x.GroupName != @group))
+            if (list.All(x => x.EventStreamId != stream && x.GroupName != @group))
             {
                 _logger.LogInformation("Creating PersistentSubscription {Group} on {Stream}", group, stream);
 
