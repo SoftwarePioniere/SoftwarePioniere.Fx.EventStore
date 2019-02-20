@@ -80,6 +80,8 @@ namespace SoftwarePioniere.EventStore.Cluster.Tests
 
             //erstes erstellen
             await setup.CreateContinousProjectionAsync(name, query);
+            await Task.Delay(500);
+
             (await setup.CheckContinousProjectionIsCreatedAsync(name, query)).Should().BeTrue();
 
             (await setup.CheckProjectionIsRunningAsync(name)).Should().BeTrue();
