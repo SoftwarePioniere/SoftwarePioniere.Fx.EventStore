@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EventStore.ClientAPI;
 using EventStore.ClientAPI.Projections;
 using EventStore.ClientAPI.UserManagement;
 using Microsoft.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace SoftwarePioniere.EventStore
 {
@@ -53,7 +55,7 @@ namespace SoftwarePioniere.EventStore
                 _logger.LogTrace("Group $admin added to ops user");
             }
         }
-       
+
         public async Task<bool> CheckContinousProjectionIsCreatedAsync(string name, string query)
         {
             _logger.LogTrace("CheckContinousProjectionAsync: {ProjectionName}", name);
@@ -120,7 +122,8 @@ namespace SoftwarePioniere.EventStore
             return false;
         }
 
-        public async Task CreateContinousProjectionAsync(string name, string query, bool trackEmittedStreams = false, bool? emitEnabled = false)
+        public async Task CreateContinousProjectionAsync(string name, string query, bool trackEmittedStreams = false,
+            bool? emitEnabled = false)
         {
             _logger.LogTrace("CreateContinousProjectionAsync: {ProjectionName}", name);
 
@@ -148,7 +151,8 @@ namespace SoftwarePioniere.EventStore
             else
             {
                 _logger.LogDebug("Projection Not Found: {ProjectionName}. Try Create", name);
-                await manager.CreateContinuousAsync(name, query, trackEmittedStreams, _provider.AdminCredentials).ConfigureAwait(false);
+                await manager.CreateContinuousAsync(name, query, trackEmittedStreams, _provider.AdminCredentials)
+                    .ConfigureAwait(false);
                 await manager.UpdateQueryAsync(name, query, emitEnabled, _provider.AdminCredentials);
                 await manager.EnableAsync(name, _provider.AdminCredentials);
                 await Task.Delay(1000).ConfigureAwait(false);
@@ -158,6 +162,8 @@ namespace SoftwarePioniere.EventStore
 
             _logger.LogDebug("Projection: {ProjectionName}. Created. {exists}", name, exists);
         }
+
+
 
 
         public async Task DisableProjectionAsync(string name)
@@ -177,7 +183,7 @@ namespace SoftwarePioniere.EventStore
                 _logger.LogDebug("Projection {ProjectionName} is not Running", name);
             }
         }
-     
+
         public async Task EnableProjectionAsync(string name)
         {
             _logger.LogTrace("EnableProjectionAsync: {ProjectionName}", name);
@@ -224,6 +230,35 @@ namespace SoftwarePioniere.EventStore
             var eq = string.Equals(clean1, clean2, StringComparison.OrdinalIgnoreCase);
 
             return eq;
+        }
+
+        public async Task CreatePersistentSubscriptionAsync(string stream, string group, Action<PersistentSubscriptionSettings> configure = null)
+        {
+            _logger.LogDebug("CreatePersistentSubscriptionAsync {Stream} {Group}", stream, group);
+
+            var manager = _provider.CreatePersistentSubscriptionsManager();
+            var cred = _provider.AdminCredentials;
+            var con = _provider.Connection.Value;
+
+            var list = await manager.List(stream, cred);
+
+            if (list.All(x => x.GroupName != @group))
+            {
+                _logger.LogInformation("Creating PersistentSubscription {Group} on {Stream}", group, stream);
+
+                PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.Create()
+                    .DoNotResolveLinkTos()
+                    .StartFromBeginning();
+
+                configure?.Invoke(settings);
+
+                await con.CreatePersistentSubscriptionAsync(stream, group, settings, cred);
+
+            }
+            else
+            {
+                _logger.LogDebug("PersistensSubscription {Group} on {Stream} exists", group, stream);
+            }
         }
     }
 }
