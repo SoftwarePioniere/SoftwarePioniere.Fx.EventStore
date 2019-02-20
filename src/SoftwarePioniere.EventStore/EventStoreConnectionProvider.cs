@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
+using EventStore.ClientAPI.PersistentSubscriptions;
 using EventStore.ClientAPI.Projections;
 using EventStore.ClientAPI.SystemData;
 using EventStore.ClientAPI.UserManagement;
@@ -37,6 +38,12 @@ namespace SoftwarePioniere.EventStore
             return manager;
         }
 
+        public PersistentSubscriptionsManager CreatePersistentSubscriptionsManager()
+        {
+            var manager = new PersistentSubscriptionsManager(new EventStoreLogger(_logger), GetHttpIpEndpoint(),
+                TimeSpan.FromSeconds(5));
+            return manager;
+        }
 
         public EventStoreConnectionProvider(ILoggerFactory loggerFactory, IOptions<EventStoreOptions> ioptions)
         {

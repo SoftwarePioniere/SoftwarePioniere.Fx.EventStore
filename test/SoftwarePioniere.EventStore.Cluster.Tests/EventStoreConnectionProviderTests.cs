@@ -30,20 +30,20 @@ namespace SoftwarePioniere.EventStore.Cluster.Tests
         }
 
         [Fact]
-        public void CanConnectToStoreWithOutSsl()
+        public async Task CanConnectToStoreWithOutSsl()
         {
             var provider = CreateProvider(c => c.UseSslCertificate = false);
             var con = provider.Connection.Value;
-            var meta = con.GetStreamMetadataAsync("$all", provider.AdminCredentials).Result;
+            var meta = await con.GetStreamMetadataAsync("$all", provider.AdminCredentials);
             meta.Stream.Should().Be("$all");
         }
 
         [Fact]
-        public void CanConnectWithSsl()
+        public async Task CanConnectWithSsl()
         {
             var provider = CreateProvider(c => c.UseSslCertificate = true);
             var con = provider.Connection.Value;
-            var meta = con.GetStreamMetadataAsync("$all", provider.AdminCredentials).Result;
+            var meta = await con.GetStreamMetadataAsync("$all", provider.AdminCredentials);
             meta.Stream.Should().Be("$all");
         }
 

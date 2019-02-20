@@ -53,18 +53,7 @@ namespace SoftwarePioniere.EventStore
                 _logger.LogTrace("Group $admin added to ops user");
             }
         }
-
-        //public void AllowOpsUserOnStream(string name)
-        //{
-        //    _logger.LogDebug("AllowOpsUserOnStream: {StreamName}", name);
-
-        //    //var conn = _provider._provider.Connection.Value.Value;
-
-        //    //  var set = new SystemSettings(new StreamAcl(),  );
-
-        //    throw new NotImplementedException();
-        //}
-
+       
         public async Task<bool> CheckContinousProjectionIsCreatedAsync(string name, string query)
         {
             _logger.LogTrace("CheckContinousProjectionAsync: {ProjectionName}", name);
@@ -188,11 +177,7 @@ namespace SoftwarePioniere.EventStore
                 _logger.LogDebug("Projection {ProjectionName} is not Running", name);
             }
         }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="name"></param>
-        /// <exception cref="InvalidOperationException"></exception>
+     
         public async Task EnableProjectionAsync(string name)
         {
             _logger.LogTrace("EnableProjectionAsync: {ProjectionName}", name);
@@ -240,47 +225,5 @@ namespace SoftwarePioniere.EventStore
 
             return eq;
         }
-
-
-        //public async Task InsertEmptyEventIfStreamIsEmpty(string streamName)
-        //{
-        //    bool isEmpty;
-
-        //    try
-        //    {
-        //        isEmpty = await _provider.IsStreamEmptyAsync(streamName).ConfigureAwait(false);
-
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        isEmpty = true;
-        //        Console.WriteLine(e);
-        //    }
-
-        //    if (isEmpty)
-        //    {
-        //        await InsertEmptyEventAsync(streamName);
-        //    }
-
-        //}
-
-
-        //public async Task InsertEmptyEventAsync(string streamName)
-        //{
-
-        //    _logger.LogDebug("InsertEmptyEvent to Stream {StreamName}", streamName);
-
-        //    var events = new[] { new EmptyDomainEvent().ToEventData(null) };
-
-        //    var name = streamName; // $"{aggregateName}-empty";
-
-        //    //wenn es eine category stream ist, dann den basis stream finden und eine neue gruppe -empty erzeugen
-        //    if (streamName.Contains("$ce-"))
-        //        name = $"{streamName.Replace("$ce-", string.Empty)}-empty";
-
-        //    _logger.LogDebug("InsertEmptyEvent: StreamName {StreamName}", name);
-        //    await _provider.Connection.Value.AppendToStreamAsync(name, -1, events, _provider.OpsCredentials).ConfigureAwait(false);
-
-        //}
     }
 }

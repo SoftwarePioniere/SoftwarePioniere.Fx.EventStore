@@ -12,7 +12,7 @@ namespace SoftwarePioniere.Extensions.DependencyInjection
         public static IServiceCollection AddEventStoreConnection(this IServiceCollection services) =>
             services.AddEventStoreConnection(_ => { });
 
-        public static IServiceCollection AddEventStoreConnection(this IServiceCollection services, Action<EventStoreOptions> configureOptions, 
+        public static IServiceCollection AddEventStoreConnection(this IServiceCollection services, Action<EventStoreOptions> configureOptions,
             Action<ConnectionSettingsBuilder> connectionSetup = null)
         {
 
@@ -27,8 +27,8 @@ namespace SoftwarePioniere.Extensions.DependencyInjection
 
             services
                 .AddSingleton<EventStoreConnectionProvider>()
-                .AddTransient<EventStoreSetup>()                
-                .AddTransient<IHostedService, EventStoreInitializerBackgroundService>()
+                .AddTransient<EventStoreSetup>()
+              //  .AddTransient<IHostedService, EventStoreInitializerBackgroundService>()
                 .AddSingleton<IEventStoreInitializer, EventStoreSecurityInitializer>()
                 ;
 
