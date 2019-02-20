@@ -28,7 +28,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             _logger.LogDebug("ExecuteAsync");
           
             _logger.LogDebug("Initialize IProjectorRegistry");
-            await _projectorRegistry.InitializeAsync(stoppingToken);
+            await _projectorRegistry.StartAsync(stoppingToken);
 
         }
     }

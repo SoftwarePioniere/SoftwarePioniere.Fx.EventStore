@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using Foundatio.Caching;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SoftwarePioniere.EventStore;
 using SoftwarePioniere.Messaging;
@@ -25,17 +26,21 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         public EventStoreProjectorRegistry(ILoggerFactory loggerFactory
             , EventStoreConnectionProvider connectionProvider
-            , IEnumerable<IReadModelProjector> projectors
+            , IServiceProvider serviceProvider
             , IEntityStore entityStore
             , ICacheClient cache
         )
         {
+            if (serviceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(serviceProvider));
+            }
 
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
 
             _logger = loggerFactory.CreateLogger(GetType());
-            _projectors = projectors ?? throw new ArgumentNullException(nameof(projectors));
+            _projectors = serviceProvider.GetServices<IReadModelProjector>();
             _entityStore = entityStore ?? throw new ArgumentNullException(nameof(entityStore));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
@@ -181,7 +186,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         }
 
-        public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Starting InitializeAsync");
             var sw = Stopwatch.StartNew();
@@ -327,6 +332,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             }
             _logger.LogInformation("EventStore Projection Initializer Finished in {Elapsed:0.0000} ms", sw.ElapsedMilliseconds);
         }
+
+      
 
         public async Task<ProjectionRegistryStatus> GetStatusAsync()
         {
