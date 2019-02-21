@@ -163,7 +163,36 @@ namespace SoftwarePioniere.EventStore
             _logger.LogDebug("Projection: {ProjectionName}. Created. {exists}", name, exists);
         }
 
+        public async Task CreatePersistentSubscriptionAsync(string stream, string group,
+            Action<PersistentSubscriptionSettings> configure = null)
+        {
+            _logger.LogDebug("CreatePersistentSubscriptionAsync {Stream} {Group}", stream, group);
 
+            var manager = _provider.CreatePersistentSubscriptionsManager();
+            var cred = _provider.AdminCredentials;
+            var con = _provider.Connection.Value;
+
+            var list = await manager.List(cred);
+            var exists = list.Any(x => string.Equals(x.EventStreamId, stream) &&
+                                       string.Equals(x.GroupName, group));
+
+            if (!exists)
+            {
+                _logger.LogInformation("Creating PersistentSubscription {Group} on {Stream}", group, stream);
+
+                PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.Create()
+                    .DoNotResolveLinkTos()
+                    .StartFromBeginning();
+
+                configure?.Invoke(settings);
+
+                await con.CreatePersistentSubscriptionAsync(stream, group, settings, cred);
+            }
+            else
+            {
+                _logger.LogDebug("PersistensSubscription {Group} on {Stream} exists", group, stream);
+            }
+        }
 
 
         public async Task DisableProjectionAsync(string name)
@@ -230,35 +259,6 @@ namespace SoftwarePioniere.EventStore
             var eq = string.Equals(clean1, clean2, StringComparison.OrdinalIgnoreCase);
 
             return eq;
-        }
-
-        public async Task CreatePersistentSubscriptionAsync(string stream, string group, Action<PersistentSubscriptionSettings> configure = null)
-        {
-            _logger.LogDebug("CreatePersistentSubscriptionAsync {Stream} {Group}", stream, group);
-
-            var manager = _provider.CreatePersistentSubscriptionsManager();
-            var cred = _provider.AdminCredentials;
-            var con = _provider.Connection.Value;
-
-            var list = await manager.List(cred);
-
-            if (list.All(x => x.EventStreamId != stream && x.GroupName != @group))
-            {
-                _logger.LogInformation("Creating PersistentSubscription {Group} on {Stream}", group, stream);
-
-                PersistentSubscriptionSettings settings = PersistentSubscriptionSettings.Create()
-                    .DoNotResolveLinkTos()
-                    .StartFromBeginning();
-
-                configure?.Invoke(settings);
-
-                await con.CreatePersistentSubscriptionAsync(stream, group, settings, cred);
-
-            }
-            else
-            {
-                _logger.LogDebug("PersistensSubscription {Group} on {Stream} exists", group, stream);
-            }
         }
     }
 }
