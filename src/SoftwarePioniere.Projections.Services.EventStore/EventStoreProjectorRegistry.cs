@@ -225,115 +225,135 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 }
             }
 
+            var tasks = new List<Task>();
 
             foreach (var projector in _projectors)
             {
-                var projectorId = projector.GetType().FullName;
-                projector.Initialize(cancellationToken);
-
-                {
-                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
-                    var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
-                    statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
-                    statusItem.Entity.StatusText = "Starting";
-                    await _entityStore.SaveAsync(statusItem, cancellationToken);
-                }
-
-                _logger.LogInformation("Initialize Projector {ProjectorName}", projectorId);
-
-                var context =
-                    new EventStoreProjectionContext(_loggerFactory, _connectionProvider, _entityStore, projector)
-                    {
-                        StreamName = projector.StreamName,
-                        ProjectorId = projectorId
-                    };
-
-                projector.Context = context;
-
-
-                await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionStatus>());
-                var status = await _entityStore.LoadAsync<ProjectionStatus>(projectorId, cancellationToken);
-                context.Status = status.Entity;
-
-                if (status.IsNew)
-                {
-                    _logger.LogDebug("Starting Empty Initialization for Projector {Projector}", projectorId);
-
-                    {
-                        await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
-                        var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
-                        statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
-                        statusItem.Entity.StatusText = "StartingInitialization";
-                        await _entityStore.SaveAsync(statusItem, cancellationToken);
-                    }
-
-                    //start init mode
-                    await context.StartInitializationModeAsync();
-
-                    // await ReadStreamAsync(context.StreamName, context.Queue, cancellationToken);
-                    {
-                        await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
-                        var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
-                        statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
-                        statusItem.Entity.StatusText = "InitializationStartingStreamReading";
-                        await _entityStore.SaveAsync(statusItem, cancellationToken);
-                    }
-
-                    var tempStatus = await ReadStreamAsync(context.StreamName, context, cancellationToken);
-
-                    if (tempStatus != null)
-                    {
-                        status.Entity.LastCheckPoint = tempStatus.LastCheckPoint;
-                        status.Entity.ModifiedOnUtc = tempStatus.ModifiedOnUtc;
-                    }
-
-                    //QueueStats stats;
-                    //do
-                    //{
-                    //    await Task.Delay(100, cancellationToken);
-                    //    stats = await context.Queue.GetQueueStatsAsync();
-                    //} while (stats.Enqueued > stats.Dequeued);
-
-                    {
-                        await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
-                        var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
-                        statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
-                        statusItem.Entity.StatusText = "InitializationStartingCopy";
-                        await _entityStore.SaveAsync(statusItem, cancellationToken);
-                    }
-
-                    await projector.CopyEntitiesAsync(context.EntityStore, _entityStore, cancellationToken);
-
-                    await context.StopInitializationModeAsync();
-
-                    await _entityStore.SaveAsync(status, cancellationToken);
-
-                    {
-                        await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
-                        var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
-                        statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
-                        statusItem.Entity.StatusText = "InitializationFinished";
-                        await _entityStore.SaveAsync(statusItem, cancellationToken);
-                    }
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                _logger.LogDebug("Starting Subscription on EventStore for Projector {Projector}", context.ProjectorId);
-                context.StartSubscription(cancellationToken);
-
-                {
-                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
-                    var statusItem = await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId, cancellationToken: cancellationToken);
-                    statusItem.Entity.Status = ProjectionInitializationStatus.StatusReady;
-                    statusItem.Entity.StatusText = "Startet";
-                    await _entityStore.SaveAsync(statusItem, cancellationToken);
-                }
-
+                var t = InitProjectorInternal(cancellationToken, projector);
+                tasks.Add(t);
             }
+
+            await Task.WhenAll(tasks);
+
             _logger.LogInformation("EventStore Projection Initializer Finished in {Elapsed:0.0000} ms", sw.ElapsedMilliseconds);
         }
 
-      
+        private async Task InitProjectorInternal(CancellationToken cancellationToken, IReadModelProjector projector)
+        {
+            var projectorId = projector.GetType().FullName;
+            projector.Initialize(cancellationToken);
+
+            {
+                await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
+                var statusItem =
+                    await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId,
+                        cancellationToken: cancellationToken);
+                statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                statusItem.Entity.StatusText = "Starting";
+                await _entityStore.SaveAsync(statusItem, cancellationToken);
+            }
+
+            _logger.LogInformation("Initialize Projector {ProjectorName}", projectorId);
+
+            var context =
+                new EventStoreProjectionContext(_loggerFactory, _connectionProvider, _entityStore, projector)
+                {
+                    StreamName = projector.StreamName,
+                    ProjectorId = projectorId
+                };
+
+            projector.Context = context;
+
+
+            await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionStatus>());
+            var status = await _entityStore.LoadAsync<ProjectionStatus>(projectorId, cancellationToken);
+            context.Status = status.Entity;
+
+            if (status.IsNew)
+            {
+                _logger.LogDebug("Starting Empty Initialization for Projector {Projector}", projectorId);
+
+                {
+                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
+                    var statusItem =
+                        await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId,
+                            cancellationToken: cancellationToken);
+                    statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                    statusItem.Entity.StatusText = "StartingInitialization";
+                    await _entityStore.SaveAsync(statusItem, cancellationToken);
+                }
+
+                //start init mode
+                await context.StartInitializationModeAsync();
+
+                // await ReadStreamAsync(context.StreamName, context.Queue, cancellationToken);
+                {
+                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
+                    var statusItem =
+                        await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId,
+                            cancellationToken: cancellationToken);
+                    statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                    statusItem.Entity.StatusText = "InitializationStartingStreamReading";
+                    await _entityStore.SaveAsync(statusItem, cancellationToken);
+                }
+
+                var tempStatus = await ReadStreamAsync(context.StreamName, context, cancellationToken);
+
+                if (tempStatus != null)
+                {
+                    status.Entity.LastCheckPoint = tempStatus.LastCheckPoint;
+                    status.Entity.ModifiedOnUtc = tempStatus.ModifiedOnUtc;
+                }
+
+                //QueueStats stats;
+                //do
+                //{
+                //    await Task.Delay(100, cancellationToken);
+                //    stats = await context.Queue.GetQueueStatsAsync();
+                //} while (stats.Enqueued > stats.Dequeued);
+
+                {
+                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
+                    var statusItem =
+                        await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId,
+                            cancellationToken: cancellationToken);
+                    statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                    statusItem.Entity.StatusText = "InitializationStartingCopy";
+                    await _entityStore.SaveAsync(statusItem, cancellationToken);
+                }
+
+                await projector.CopyEntitiesAsync(context.EntityStore, _entityStore, cancellationToken);
+
+                await context.StopInitializationModeAsync();
+
+                await _entityStore.SaveAsync(status, cancellationToken);
+
+                {
+                    await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
+                    var statusItem =
+                        await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId,
+                            cancellationToken: cancellationToken);
+                    statusItem.Entity.Status = ProjectionInitializationStatus.StatusPending;
+                    statusItem.Entity.StatusText = "InitializationFinished";
+                    await _entityStore.SaveAsync(statusItem, cancellationToken);
+                }
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            _logger.LogDebug("Starting Subscription on EventStore for Projector {Projector}", context.ProjectorId);
+            context.StartSubscription(cancellationToken);
+
+            {
+                await _cache.RemoveByPrefixAsync(CacheKeys.Create<ProjectionInitializationStatus>());
+                var statusItem =
+                    await _entityStore.LoadAsync<ProjectionInitializationStatus>(projectorId,
+                        cancellationToken: cancellationToken);
+                statusItem.Entity.Status = ProjectionInitializationStatus.StatusReady;
+                statusItem.Entity.StatusText = "Startet";
+                await _entityStore.SaveAsync(statusItem, cancellationToken);
+            }
+        }
+
 
         public async Task<ProjectionRegistryStatus> GetStatusAsync()
         {
