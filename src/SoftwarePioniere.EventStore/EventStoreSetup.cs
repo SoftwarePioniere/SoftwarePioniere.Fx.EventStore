@@ -6,12 +6,13 @@ using EventStore.ClientAPI;
 using EventStore.ClientAPI.Projections;
 using EventStore.ClientAPI.UserManagement;
 using Microsoft.Extensions.Logging;
+using SoftwarePioniere.Messaging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace SoftwarePioniere.EventStore
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class EventStoreSetup
+    public class EventStoreSetup : IEventStoreSetup
     {
         private readonly ILogger _logger;
         private readonly EventStoreConnectionProvider _provider;
@@ -163,8 +164,7 @@ namespace SoftwarePioniere.EventStore
             _logger.LogDebug("Projection: {ProjectionName}. Created. {exists}", name, exists);
         }
 
-        public async Task CreatePersistentSubscriptionAsync(string stream, string group,
-            Action<PersistentSubscriptionSettings> configure = null)
+        public async Task CreatePersistentSubscriptionAsync(string stream, string group)
         {
             _logger.LogDebug("CreatePersistentSubscriptionAsync {Stream} {Group}", stream, group);
 
@@ -184,7 +184,7 @@ namespace SoftwarePioniere.EventStore
                     .DoNotResolveLinkTos()
                     .StartFromBeginning();
 
-                configure?.Invoke(settings);
+                //   configure?.Invoke(settings);
 
                 await con.CreatePersistentSubscriptionAsync(stream, group, settings, cred);
             }
@@ -193,7 +193,6 @@ namespace SoftwarePioniere.EventStore
                 _logger.LogDebug("PersistensSubscription {Group} on {Stream} exists", group, stream);
             }
         }
-
 
         public async Task DisableProjectionAsync(string name)
         {

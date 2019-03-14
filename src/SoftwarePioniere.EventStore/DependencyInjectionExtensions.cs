@@ -2,6 +2,7 @@
 using EventStore.ClientAPI;
 using Microsoft.Extensions.DependencyInjection;
 using SoftwarePioniere.EventStore;
+using SoftwarePioniere.Messaging;
 
 // ReSharper disable once CheckNamespace
 namespace SoftwarePioniere.Extensions.DependencyInjection
@@ -27,6 +28,7 @@ namespace SoftwarePioniere.Extensions.DependencyInjection
             services
                 .AddSingleton<EventStoreConnectionProvider>()
                 .AddTransient<EventStoreSetup>()
+                .AddTransient<IEventStoreSetup>(p => p.GetRequiredService<EventStoreSetup>())
                 //  .AddTransient<IHostedService, EventStoreInitializerBackgroundService>()
                 .AddSingleton<IEventStoreInitializer, EventStoreSecurityInitializer>()
                 ;

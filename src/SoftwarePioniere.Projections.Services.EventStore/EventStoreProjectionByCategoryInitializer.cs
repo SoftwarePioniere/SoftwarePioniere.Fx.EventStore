@@ -1,18 +1,18 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using SoftwarePioniere.EventStore;
+using SoftwarePioniere.Messaging;
 
 namespace SoftwarePioniere.Projections.Services.EventStore
 {
     public class EventStoreProjectionByCategoryInitializer : IEventStoreInitializer
     {
-        private readonly EventStoreSetup _setup;
+        private readonly IEventStoreSetup _setup;
 
         private readonly ILogger _logger;
 
         public EventStoreProjectionByCategoryInitializer(ILoggerFactory loggerFactory
-            , EventStoreSetup setup)
+            , IEventStoreSetup setup)
         {
             _setup = setup;
 

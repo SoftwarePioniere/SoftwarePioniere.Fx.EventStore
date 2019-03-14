@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SoftwarePioniere.EventStore;
+using SoftwarePioniere.Messaging;
 using SoftwarePioniere.Projections;
 using SoftwarePioniere.Projections.Services.EventStore;
 
