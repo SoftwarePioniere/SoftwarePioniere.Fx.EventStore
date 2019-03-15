@@ -225,16 +225,16 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                 }
             }
 
-            //  var tasks = new List<Task>();
+            var tasks = new List<Task>();
 
             foreach (var projector in _projectors)
             {
-                //var t = InitProjectorInternal(cancellationToken, projector);
-                await InitProjectorInternal(cancellationToken, projector);
-                //    tasks.Add(t);
+                //await InitProjectorInternal(cancellationToken, projector);
+                var t = InitProjectorInternal(cancellationToken, projector);                
+                tasks.Add(t);
             }
 
-            //   await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks);
 
             _logger.LogInformation("EventStore Projection Initializer Finished in {Elapsed:0.0000} ms", sw.ElapsedMilliseconds);
         }
