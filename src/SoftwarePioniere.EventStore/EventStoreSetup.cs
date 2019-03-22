@@ -170,8 +170,9 @@ namespace SoftwarePioniere.EventStore
 
             var manager = _provider.CreatePersistentSubscriptionsManager();
             var cred = _provider.AdminCredentials;
-            var con = _provider.Connection.Value;
 
+            var con = await _provider.GetActiveConnection();
+            
             var list = await manager.List(cred);
             var exists = list.Any(x => string.Equals(x.EventStreamId, stream) &&
                                        string.Equals(x.GroupName, group));

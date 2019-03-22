@@ -51,9 +51,9 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             //var sliceStart = 1; //Ignores $StreamCreated
             long sliceStart = 0; //Ignores $StreamCreated
 
-            var connection = _provider.Connection;
+            var con = await _provider.GetActiveConnection();
 
-            var currentSlice = await connection.Value
+            var currentSlice = await con
                 .ReadStreamEventsForwardAsync(streamName, sliceStart, 1, false, _provider.OpsCredentials)
                 .ConfigureAwait(false);
 
@@ -85,7 +85,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             _logger.LogDebug("SaveEvents {type} {AggregateId} {AggregateVersion}", typeof(T), aggregateId, aggregateVersion);
             var t = typeof(T);
 
-            var connection = _provider.Connection;
+            var con = await _provider.GetActiveConnection();
 
             var streamName = _aggregateIdToStreamName(t, aggregateId);
             var domainEvents = events as IDomainEvent[] ?? events.ToArray();
@@ -121,7 +121,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             {
                 try
                 {
-                    var result = await connection.Value
+                    var result = await con
                         .AppendToStreamAsync(streamName, expectedVersion, eventsToSave, _provider.OpsCredentials)
                         .ConfigureAwait(false);
                     _logger.LogTrace("EventStore - WriteResult: {@WriteResult}", result);
@@ -139,7 +139,8 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             {
                 try
                 {
-                    var transaction = await connection.Value
+                  
+                    var transaction = await con
                         .StartTransactionAsync(streamName, expectedVersion, _provider.OpsCredentials)
                         .ConfigureAwait(false);
 
@@ -187,7 +188,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
             long sliceStart = 0; //Ignores $StreamCreated
             StreamEventsSlice currentSlice;
 
-            var connection = _provider.Connection;
+            var con = await _provider.GetActiveConnection();
 
             var i = -1;
 
@@ -197,7 +198,7 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore
                     ? ReadPageSize
                     : aggregateVersion - sliceStart + 1;
 
-                currentSlice = await connection.Value
+                currentSlice = await con
                     .ReadStreamEventsForwardAsync(streamName, sliceStart, (int)sliceCount, false,
                         _provider.OpsCredentials).ConfigureAwait(false);
 

@@ -100,19 +100,19 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
         private CancellationToken _cancellationToken;
 
-        public void StartSubscription(CancellationToken cancellationToken = default(CancellationToken))
+        public Task StartSubscription(CancellationToken cancellationToken = default(CancellationToken))
         {
             _logger.LogInformation("StartSubscription for Projector {ProjectorId} on {Stream}", ProjectorId, StreamName);
             _cancellationToken = cancellationToken;
-            StartSubscriptionInternal();
+            return StartSubscriptionInternal();
         }
 
-        private void StartSubscriptionInternal()
+        private async Task StartSubscriptionInternal()
         {
             _logger.LogDebug("StartSubscriptionInternal for Projector {ProjectorId} on {Stream}", ProjectorId, StreamName);
 
             var cred = _connectionProvider.OpsCredentials;
-            var src = _connectionProvider.Connection.Value;
+            var src = await _connectionProvider.GetActiveConnection();
             long? lastCheckpoint = null;
 
             if (Status.LastCheckPoint.HasValue && Status.LastCheckPoint != -1)
@@ -132,8 +132,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         }
 
 
-
-        private void SubscriptionDropped(EventStoreCatchUpSubscription sub, SubscriptionDropReason reason, Exception ex)
+        private async void SubscriptionDropped(EventStoreCatchUpSubscription sub, SubscriptionDropReason reason, Exception ex)
         {
             _logger.LogError(ex, "SubscriptionDropped on StreamId {StreamId}, Projector {ProjectorId}, Reason: {Reason}",
                 sub.StreamId,
@@ -144,7 +143,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             if (!_cancellationToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Re Subscribe Subscription");
-                StartSubscriptionInternal();
+                await StartSubscriptionInternal();
             }
         }
 

@@ -92,7 +92,7 @@ namespace SoftwarePioniere.EventStore
             }
 
             RegisterEvents(con);
-            con.ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+           //con.ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 
             return con;
         }
@@ -111,7 +111,7 @@ namespace SoftwarePioniere.EventStore
             OpsCredentials = new UserCredentials(options.OpsUsername, options.OpsPassword);
             AdminCredentials = new UserCredentials(options.AdminUsername, options.AdminPassword);
 
-            Connection = new Lazy<IEventStoreConnection>(CreateNewConnection);
+            _connection = new Lazy<IEventStoreConnection>(CreateNewConnection);
         }
 
         private IEventStoreConnection CreateForCluster(ConnectionSettingsBuilder connectionSettingsBuilder)
@@ -200,7 +200,7 @@ namespace SoftwarePioniere.EventStore
 
         public bool IsConfigured { get; private set; }
 
-        private IDictionary<string, IPAddress> _hostIpAddresses = new Dictionary<string, IPAddress>();
+        private readonly IDictionary<string, IPAddress> _hostIpAddresses = new Dictionary<string, IPAddress>();
 
         private IPAddress GetHostIp(string ipEndpoint)
         {
@@ -255,11 +255,25 @@ namespace SoftwarePioniere.EventStore
         /// Einstellungen
         /// </summary>
         public EventStoreOptions Options { get; }
+        
+        public async Task<IEventStoreConnection> GetActiveConnection()
+        {
+            if (!_connection.IsValueCreated)
+            {
+                var con = _connection.Value;
+                await con.ConnectAsync();
+                return con;
+            }
 
-        /// <summary>
-        /// Connection als Lazy Objekt
-        /// </summary>
-        public Lazy<IEventStoreConnection> Connection { get; }
+            return _connection.Value;
+        }
+
+        private readonly Lazy<IEventStoreConnection> _connection;
+
+        ///// <summary>
+        ///// Connection als Lazy Objekt
+        ///// </summary>
+        //public Lazy<IEventStoreConnection> Connection { get; }
 
         /// <summary>
         /// Ops Verbindungsdaten
@@ -270,8 +284,7 @@ namespace SoftwarePioniere.EventStore
         /// Admin Verbindungsdaten
         /// </summary>
         public UserCredentials AdminCredentials { get; }
-
-
+        
 
         public async Task<bool> IsStreamEmptyAsync(string streamName)
         {
@@ -299,7 +312,7 @@ namespace SoftwarePioniere.EventStore
 
             //try
             //{
-            var con = Connection.Value;
+            var con = await GetActiveConnection();
 
             var slice = await con.ReadStreamEventsForwardAsync(streamName, 0, 1, false, AdminCredentials).ConfigureAwait(false);
             _logger.LogTrace("StreamExists {StreamName} : SliceStatus: {SliceStatus}", streamName, slice.Status);

@@ -100,7 +100,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             var sw = Stopwatch.StartNew();
 
             var cred = _connectionProvider.OpsCredentials;
-            var src = _connectionProvider.Connection.Value;
+            var src = await _connectionProvider.GetActiveConnection();
 
             StreamEventsSlice slice;
 
@@ -175,8 +175,8 @@ namespace SoftwarePioniere.Projections.Services.EventStore
                     name = $"{streamName.Replace("$ce-", string.Empty)}-empty";
 
                 _logger.LogDebug("InsertEmptyEvent: StreamName {StreamName}", name);
-                await _connectionProvider.Connection.Value
-                    .AppendToStreamAsync(name, -1, events, _connectionProvider.OpsCredentials).ConfigureAwait(false);
+                var con = await _connectionProvider.GetActiveConnection();
+                await con.AppendToStreamAsync(name, -1, events, _connectionProvider.OpsCredentials).ConfigureAwait(false);
 
             }
             else
@@ -308,8 +308,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             cancellationToken.ThrowIfCancellationRequested();
             _logger.LogDebug("Starting Subscription on EventStore for Projector {Projector}", context.ProjectorId);
-            context.StartSubscription(cancellationToken);
-
+            await context.StartSubscription(cancellationToken);
             await UpdateInitializationStatusAsync(cancellationToken, projectorId, ProjectionInitializationStatus.StatusReady, "Startet");
         }
 
