@@ -45,7 +45,7 @@ namespace SoftwarePioniere.EventStore
             return manager;
         }
 
-        public IEventStoreConnection CreateNewConnection()
+        public IEventStoreConnection CreateNewConnection(Action<ConnectionSettingsBuilder> setup = null)
         {
             _logger.LogTrace("Creating Connection");
 
@@ -54,7 +54,7 @@ namespace SoftwarePioniere.EventStore
                 .KeepReconnecting()
                 .KeepRetrying();
 
-            Options.ConnectionSetup?.Invoke(connectionSettingsBuilder);
+            setup?.Invoke(connectionSettingsBuilder);
 
             if (!Options.UseCluster)
             {
@@ -92,7 +92,7 @@ namespace SoftwarePioniere.EventStore
             }
 
             RegisterEvents(con);
-           //con.ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            //con.ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 
             return con;
         }
@@ -111,7 +111,7 @@ namespace SoftwarePioniere.EventStore
             OpsCredentials = new UserCredentials(options.OpsUsername, options.OpsPassword);
             AdminCredentials = new UserCredentials(options.AdminUsername, options.AdminPassword);
 
-            _connection = new Lazy<IEventStoreConnection>(CreateNewConnection);
+            _connection = new Lazy<IEventStoreConnection>(() => CreateNewConnection(options.ConnectionSetup));
         }
 
         private IEventStoreConnection CreateForCluster(ConnectionSettingsBuilder connectionSettingsBuilder)
@@ -255,7 +255,7 @@ namespace SoftwarePioniere.EventStore
         /// Einstellungen
         /// </summary>
         public EventStoreOptions Options { get; }
-        
+
         public async Task<IEventStoreConnection> GetActiveConnection()
         {
             if (!_connection.IsValueCreated)
@@ -284,7 +284,7 @@ namespace SoftwarePioniere.EventStore
         /// Admin Verbindungsdaten
         /// </summary>
         public UserCredentials AdminCredentials { get; }
-        
+
 
         public async Task<bool> IsStreamEmptyAsync(string streamName)
         {
