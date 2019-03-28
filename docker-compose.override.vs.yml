@@ -2,14 +2,14 @@ version: '3.6'
 
 services:
 
-  node1:
-    environment:
-        - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1
+  # node1:
+  #   environment:
+  #       - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1
 
-  node2:
-    environment:
-        - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1
+  # node2:
+  #   environment:
+  #       - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1
 
-  node3:
-    environment:
-        - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1
+  # node3:
+  #   environment:
+  #       - EVENTSTORE_EXT_IP_ADVERTISE_AS=127.0.0.1

@@ -7,58 +7,58 @@ services:
         - "2193:2193"
         - "1193:1193"
         - "1195:1195"
-    networks:
-      app_net_tests:
-        ipv4_address: 172.16.239.10
+    # networks:
+    #   app_net_tests:
+    #     ipv4_address: 172.16.239.10
 
-  node1:
-    image: softwarepioniere/eventstore-node1
-    ports:
-        - "3112:3112"
-        - "3114:3114"
-        - "3115:3115"
-    environment:
-        - EVENTSTORE_GOSSIP_SEED=172.16.239.12:3123,172.16.239.13:3133
-        - EVENTSTORE_EXT_IP=172.16.239.11
-        - EVENTSTORE_INT_IP=172.16.239.11
-    networks:
-      app_net_tests:
-        ipv4_address: 172.16.239.11
+#   node1:
+#     image: softwarepioniere/eventstore-node1
+#     ports:
+#         - "3112:3112"
+#         - "3114:3114"
+#         - "3115:3115"
+#     environment:
+#         - EVENTSTORE_GOSSIP_SEED=172.16.239.12:3123,172.16.239.13:3133
+#         - EVENTSTORE_EXT_IP=172.16.239.11
+#         - EVENTSTORE_INT_IP=172.16.239.11
+#     networks:
+#       app_net_tests:
+#         ipv4_address: 172.16.239.11
 
-  node2:
-    image: softwarepioniere/eventstore-node2
-    ports:
-        - "3122:3122"
-        - "3124:3124"
-        - "3125:3125"
-    environment:
-        - EVENTSTORE_GOSSIP_SEED=172.16.239.11:3113,172.16.239.13:3133
-        - EVENTSTORE_EXT_IP=172.16.239.12
-        - EVENTSTORE_INT_IP=172.16.239.12
-    networks:
-      app_net_tests:
-        ipv4_address: 172.16.239.12
+#   node2:
+#     image: softwarepioniere/eventstore-node2
+#     ports:
+#         - "3122:3122"
+#         - "3124:3124"
+#         - "3125:3125"
+#     environment:
+#         - EVENTSTORE_GOSSIP_SEED=172.16.239.11:3113,172.16.239.13:3133
+#         - EVENTSTORE_EXT_IP=172.16.239.12
+#         - EVENTSTORE_INT_IP=172.16.239.12
+#     networks:
+#       app_net_tests:
+#         ipv4_address: 172.16.239.12
 
-  node3:
-    image: softwarepioniere/eventstore-node3
-    ports:
-        - "3132:3132"
-        - "3134:3134"
-        - "3135:3135"
-    environment:
-        - EVENTSTORE_GOSSIP_SEED=172.16.239.11:3113,172.16.239.12:3123
-        - EVENTSTORE_EXT_IP=172.16.239.13
-        - EVENTSTORE_INT_IP=172.16.239.13
-    networks:
-      app_net_tests:
-        ipv4_address: 172.16.239.13
+#   node3:
+#     image: softwarepioniere/eventstore-node3
+#     ports:
+#         - "3132:3132"
+#         - "3134:3134"
+#         - "3135:3135"
+#     environment:
+#         - EVENTSTORE_GOSSIP_SEED=172.16.239.11:3113,172.16.239.12:3123
+#         - EVENTSTORE_EXT_IP=172.16.239.13
+#         - EVENTSTORE_INT_IP=172.16.239.13
+#     networks:
+#       app_net_tests:
+#         ipv4_address: 172.16.239.13
 
 
-networks:
-  app_net_tests:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      -
-        subnet: 172.16.239.0/24
+# networks:
+#   app_net_tests:
+#     driver: bridge
+#     ipam:
+#       driver: default
+#       config:
+#       -
+#         subnet: 172.16.239.0/24
