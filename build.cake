@@ -213,7 +213,7 @@ Task("DockerTest")
                  "SOPI_TESTS_EventStore__ClusterIpEndpoints:2=node3"
         };
 
-    MyDotNet.DockerComposeTestProject(image + ".cluster.tests" , "SoftwarePioniere.EventStore.Cluster.Tests", artifactsDirectory, env2);
+   // MyDotNet.DockerComposeTestProject(image + ".cluster.tests" , "SoftwarePioniere.EventStore.Cluster.Tests", artifactsDirectory, env2);
 });
 
 
