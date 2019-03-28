@@ -46,10 +46,10 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             try
             {
-                await _projector.HandleAsync(entry.EventData);
+                await _projector.ProcessEventAsync(entry.EventData);
                 Status.LastCheckPoint = entry.EventNumber;
                 Status.ModifiedOnUtc = DateTime.UtcNow;
-                await EntityStore.UpdateItemAsync(Status);
+                await EntityStore.UpdateItemAsync(Status, _cancellationToken);
             }
             catch (Exception e)
             {
