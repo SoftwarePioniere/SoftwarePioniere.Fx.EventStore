@@ -11,7 +11,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
-    <PackageReference Include="SoftwarePioniere.Messaging" Version="0.4.25" />
+    <PackageReference Include="SoftwarePioniere.Messaging" Version="0.4.30" />
   </ItemGroup>
 
 </Project>

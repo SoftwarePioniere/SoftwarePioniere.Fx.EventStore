@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using EventStore.ClientAPI;
 using EventStore.ClientAPI.PersistentSubscriptions;
@@ -256,14 +257,29 @@ namespace SoftwarePioniere.EventStore
         /// </summary>
         public EventStoreOptions Options { get; }
 
+        private static readonly SemaphoreSlim SemaphoreSlim = new SemaphoreSlim(1, 1);
+
         public async Task<IEventStoreConnection> GetActiveConnection()
         {
-            if (!_connection.IsValueCreated)
+            //https://blog.cdemi.io/async-waiting-inside-c-sharp-locks/
+            await SemaphoreSlim.WaitAsync();
+
+            try
             {
-                var con = _connection.Value;
-                await con.ConnectAsync();
-                return con;
+                if (!_connection.IsValueCreated)
+                {
+                    var con = _connection.Value;
+                    await con.ConnectAsync();
+                    return con;
+                }
             }
+            finally
+            {
+                //When the task is ready, release the semaphore. It is vital to ALWAYS release the semaphore when we are ready, or else we will end up with a Semaphore that is forever locked.
+                //This is why it is important to do the Release within a try...finally clause; program execution may crash or take a different path, this way you are guaranteed execution
+                SemaphoreSlim.Release();
+            }
+
 
             return _connection.Value;
         }
