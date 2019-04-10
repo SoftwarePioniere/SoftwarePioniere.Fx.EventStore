@@ -12,6 +12,7 @@ RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${fi
 COPY test/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p test/${file%.*}/ && mv $file test/${file%.*}/; done
 
+RUN dotnet restore SoftwarePioniere.Fx.EventStore.sln
 
 FROM restore as src
 COPY . .
