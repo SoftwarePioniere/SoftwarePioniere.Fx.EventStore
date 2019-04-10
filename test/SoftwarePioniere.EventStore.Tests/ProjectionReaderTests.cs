@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SoftwarePioniere.DomainModel;
 using SoftwarePioniere.DomainModel.FakeDomain;
-using SoftwarePioniere.Extensions.DependencyInjection;
 using SoftwarePioniere.Messaging;
 using Xunit;
 using Xunit.Abstractions;

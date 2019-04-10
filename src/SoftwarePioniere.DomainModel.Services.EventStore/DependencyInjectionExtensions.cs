@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using SoftwarePioniere.DomainModel;
+﻿using SoftwarePioniere.DomainModel;
 using SoftwarePioniere.DomainModel.Services.EventStore;
 
 // ReSharper disable once CheckNamespace
-namespace SoftwarePioniere.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class DependencyInjectionExtensions
     {

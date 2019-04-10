@@ -1,11 +1,10 @@
 ﻿using System;
 using EventStore.ClientAPI;
-using Microsoft.Extensions.DependencyInjection;
 using SoftwarePioniere.EventStore;
 using SoftwarePioniere.Messaging;
 
 // ReSharper disable once CheckNamespace
-namespace SoftwarePioniere.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class DependencyInjectionExtensions
     {

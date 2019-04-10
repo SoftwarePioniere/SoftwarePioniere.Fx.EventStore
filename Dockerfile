@@ -2,16 +2,16 @@ FROM microsoft/dotnet:2-sdk AS restore
 ARG CONFIGURATION=Release
 WORKDIR /proj
 COPY nuget.config.build.tmp ./nuget.config
-COPY Directory.Build.* ./
-COPY *.sln ./
-COPY src/SoftwarePioniere.DomainModel.Services.EventStore/*.csproj ./src/SoftwarePioniere.DomainModel.Services.EventStore/
-COPY src/SoftwarePioniere.EventStore/*.csproj ./src/SoftwarePioniere.EventStore/
-COPY src/SoftwarePioniere.EventStore.TestHarness/*.csproj ./src/SoftwarePioniere.EventStore.TestHarness/
-COPY src/SoftwarePioniere.Projections.Services.EventStore/*.csproj ./src/SoftwarePioniere.Projections.Services.EventStore/
+COPY *.sln *.props ./
 
-COPY test/SoftwarePioniere.EventStore.Tests/*.csproj ./test/SoftwarePioniere.EventStore.Tests/
-COPY test/SoftwarePioniere.EventStore.Cluster.Tests/*.csproj ./test/SoftwarePioniere.EventStore.Cluster.Tests/
-RUN dotnet restore SoftwarePioniere.Fx.EventStore.sln
+# Copy the main source project files
+COPY src/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
+
+# Copy the test project files
+COPY test/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p test/${file%.*}/ && mv $file test/${file%.*}/; done
+
 
 FROM restore as src
 COPY . .
