@@ -7,14 +7,16 @@
 
   <ItemGroup Condition=" '$(UseLocalSources)' == 'true' ">
     <ProjectReference Include="..\..\..\SoftwarePioniere.Fx\src\SoftwarePioniere.DomainModel.Services\SoftwarePioniere.DomainModel.Services.csproj" />
+    <ProjectReference Include="..\..\..\SoftwarePioniere.Fx\src\SoftwarePioniere.DomainModel.Abstractions\SoftwarePioniere.DomainModel.Abstractions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SoftwarePioniere.EventStore\SoftwarePioniere.EventStore.csproj" />
+    <ProjectReference Include="..\SoftwarePioniere.EventStore\SoftwarePioniere.EventStore.csproj" />    
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="SoftwarePioniere.DomainModel.Services" Version="0.4.43" />
+    <PackageReference Include="SoftwarePioniere.DomainModel.Abstractions" Version="0.4.43" />
   </ItemGroup>
 
 

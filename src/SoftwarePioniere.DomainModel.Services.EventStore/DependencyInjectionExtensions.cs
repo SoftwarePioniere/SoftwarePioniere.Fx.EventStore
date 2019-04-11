@@ -1,5 +1,7 @@
 ﻿using SoftwarePioniere.DomainModel;
 using SoftwarePioniere.DomainModel.Services.EventStore;
+using SoftwarePioniere.DomainModel.Services.EventStore.Subscriptions;
+using SoftwarePioniere.DomainModel.Subscriptions;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -16,5 +18,16 @@ namespace Microsoft.Extensions.DependencyInjection
             
             return services;
         }
+
+
+        public static IServiceCollection AddEventStorePersistentSubscription(this IServiceCollection services)
+        {
+            services
+                .AddSingleton<IPersistentSubscriptionFactory, PersistentSubscriptionFactory>();
+
+            return services;
+        }
     }
+
+    
 }
