@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
+    <UseLocalSources>false</UseLocalSources>
     <ParentBuildProps>$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))</ParentBuildProps>
   </PropertyGroup>
 
