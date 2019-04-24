@@ -4,8 +4,6 @@
 #load "./scripts/git.cake"
 #load "./scripts/docker.cake"
 
-#addin "nuget:?package=Cake.Npm"
-#addin "nuget:?package=Cake.Docker"
 
 ///////////////////////////////////////////////////////////////////////////////
 // ARGUMENTS
