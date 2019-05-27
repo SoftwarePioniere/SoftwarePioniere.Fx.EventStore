@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SoftwarePioniere.DomainModel.Subscriptions;
 using SoftwarePioniere.EventStore;
-using SoftwarePioniere.Messaging;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace SoftwarePioniere.DomainModel.Services.EventStore.Subscriptions
@@ -18,9 +17,8 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore.Subscriptions
     {
         private readonly EventStoreConnectionProvider _connectionProvider;
         private readonly CancellationToken _cancellationToken;
-        private readonly ITelemetryAdapter _telemetryAdapter;
-
-        public PersistentSubscriptionAdapter(EventStoreConnectionProvider connectionProvider, IApplicationLifetime applicationLifetime, ITelemetryAdapter telemetryAdapter)
+    
+        public PersistentSubscriptionAdapter(EventStoreConnectionProvider connectionProvider, IApplicationLifetime applicationLifetime)
         {
             if (applicationLifetime == null)
             {
@@ -29,7 +27,6 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore.Subscriptions
 
             _connectionProvider = connectionProvider ?? throw new ArgumentNullException(nameof(connectionProvider));
             _cancellationToken = applicationLifetime.ApplicationStopping;
-            _telemetryAdapter = telemetryAdapter ?? throw new ArgumentNullException(nameof(telemetryAdapter));
         }
 
         private string _stream;
@@ -143,8 +140,10 @@ namespace SoftwarePioniere.DomainModel.Services.EventStore.Subscriptions
                     var item = JsonConvert.DeserializeObject<T>(data);
 
                     var parentState = new Dictionary<string, string>();
+                    await _eventAppeared(item, parentState);
+                    
 
-                    await _telemetryAdapter.RunDependencyAsync("PERS SUBS", "EVENTSTORE", state => _eventAppeared(item, state), parentState, _logger);
+                    //await _telemetryAdapter.RunDependencyAsync("PERS SUBS", "EVENTSTORE", state => _eventAppeared(item, state), parentState, _logger);
 
                     sub.Acknowledge(subEvent);
                 }
