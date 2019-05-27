@@ -202,7 +202,7 @@ Task("DockerTest")
          "SOPI_TESTS_EventStore__IpEndPoint=eventstore"
     };
 
-    MyDotNet.DockerComposeTestProject(image + ".tests" , "SoftwarePioniere.EventStore.Tests", artifactsDirectory, env1);
+   // MyDotNet.DockerComposeTestProject(image + ".tests" , "SoftwarePioniere.EventStore.Tests", artifactsDirectory, env1);
 
     var env2 = new [] {
                  "SOPI_TESTS_EventStore__IpEndPoint=node1",
