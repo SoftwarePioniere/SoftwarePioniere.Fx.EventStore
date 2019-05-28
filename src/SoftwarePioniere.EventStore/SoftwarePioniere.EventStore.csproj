@@ -16,7 +16,7 @@
 
 
   <ItemGroup Condition=" '$(UseLocalSources)' == 'false' ">
-   <PackageReference Include="SoftwarePioniere.Messaging" Version="0.4.52" />
+   <PackageReference Include="SoftwarePioniere.Messaging" Version="0.4.53" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(UseLocalSources)' == 'true' ">

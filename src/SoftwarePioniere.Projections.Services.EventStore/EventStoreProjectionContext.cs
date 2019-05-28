@@ -92,6 +92,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
         public bool IsLiveProcessing { get; private set; }
         public string ProjectorId { get; set; }
         public string StreamName { get; set; }
+        public bool IsReady { get; set; }
 
         public bool InitializationMode { get; private set; }
 
@@ -181,6 +182,7 @@ namespace SoftwarePioniere.Projections.Services.EventStore
 
             InitializationMode = true;
             IsLiveProcessing = false;
+            IsReady = false;
 
             Status = new ProjectionStatus();
             Status.SetEntityId(ProjectorId);
@@ -195,8 +197,9 @@ namespace SoftwarePioniere.Projections.Services.EventStore
             _logger.LogDebug("StopInitializationModeAsync");
 
             InitializationMode = true;
+            IsReady = true;
             _initEntityStore = null;
-
+            
             return Task.CompletedTask;
         }
     }
